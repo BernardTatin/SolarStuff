@@ -31,13 +31,14 @@
 
 CC = cc
 LD = $(CC)
+LIBS = -L/usr/openwin/lib -lXmu -lX11 -lXext
 RM = rm -f
 
-arch = -m64
+arch = -m32
 # optim = -xO3 
 optim = -g
 
-ipath = 
+ipath = .
 CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes
 LDFLAGS = $(arch)
 
@@ -55,13 +56,13 @@ $(odir):
 	mkdir -p $@
 
 $(EXE): $(OBJS)
-		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS)
+		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-$(odir)/%.o: %.c file-reader.h
+$(odir)/%.o: %.c
 		$(CC) -c $< -o $@ $(CFLAGS)
 
-# test: $(EXE)
-		# ./$(EXE) LICENSE README.md
+test: $(EXE)
+		./$(EXE) LICENSE README.md
 
 clean:
 		$(RM) $(EXE) $(OBJS)

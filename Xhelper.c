@@ -41,15 +41,15 @@
 int XhDrawString(Display *display, Drawable d, GC gc, int x, int y, char *format, ...) {
     va_list aptr;
     int ret;
-	char buffer[MAX_STR_LEN + 1];
+    char buffer[MAX_STR_LEN + 1];
 
     va_start(aptr, format);
     ret = vsnprintf(buffer, MAX_STR_LEN, format, aptr);
     va_end(aptr);
-	buffer[MAX_STR_LEN] = 0;
-	if (ret > 0) {
-		return XDrawString(display, d, gc, x, y, buffer, ret);
-	} else {
-		return 0;
-	}
+    buffer[MAX_STR_LEN] = 0;
+    if (ret > 0) {
+        return XDrawString(display, d, gc, x, y, buffer, ret);
+    } else {
+        return 0;
+    }
 }

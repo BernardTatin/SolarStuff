@@ -34,8 +34,8 @@ LD = $(CC)
 LIBS = -L/usr/openwin/lib -lXmu -lX11 -lXext
 RM = rm -f
 
-arch = -m32
-# optim = -xO3 
+arch = -m64
+
 optim = -g
 
 ipath = .
@@ -46,7 +46,7 @@ odir = objs$(arch)
 
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
-SRC = $(MAIN).c
+SRC = $(MAIN).c Xhelper.c
 objs = $(SRC:.c=.o)
 OBJS=$(objs:%=$(odir)/%)
 

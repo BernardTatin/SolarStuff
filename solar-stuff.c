@@ -47,6 +47,8 @@
 
 #include <sys/utsname.h>
 
+#include "Xhelper.h"
+
 int main(int argc, char** argv)
 {
 	Display* dpy = XOpenDisplay(NULL);
@@ -89,31 +91,26 @@ int main(int argc, char** argv)
 			const char* s1 = "X11 test app under Solaris";
 #endif
 			const char* s2 = "(C)2012 Geeks3D.com";
-			XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, s1, strlen(s1));
+			XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, (char *)s1);
 			y_offset += 20;
-			XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, s2, strlen(s2));
+			XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, (char *)s2);
 			y_offset += 20;
 
 			if (uname_ok)
 			{
-				char buf[256] = {0};
-				sprintf(buf, "System information:");
-				XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+				XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "System information -->");
 				y_offset += 15;
 
-				sprintf(buf, "- System: %s", sname.sysname);
-				XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+				XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- System: %s", sname.sysname);
 				y_offset += 15;
 
-				sprintf(buf, "- Release: %s", sname.release);
-				XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+				XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Release: %s", sname.release);
 				y_offset += 15;
 
-				sprintf(buf, "- Version: %s", sname.version);
-				XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+				XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Version: %s", sname.version);
 				y_offset += 15;
-				sprintf(buf, "- Machine: %s", sname.machine);
-				XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+
+				XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Machine: %s", sname.machine);
 				y_offset += 20;
 			}
 
@@ -122,9 +119,8 @@ int main(int argc, char** argv)
 			XGetWindowAttributes(dpy, win, &wa);
 			int width = wa.width;
 			int height = wa.height;
-			char buf[128]={0};
-			sprintf(buf, "Current window size: %dx%d", width, height);
-			XDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, buf, strlen(buf));
+
+			XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "Current window size: %dx%d", width, height);
 			y_offset += 20;
 		}
 		if (e.type == KeyPress)

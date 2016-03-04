@@ -49,89 +49,98 @@
 
 #include "Xhelper.h"
 
+#if defined(__APPLE_CC__)
+static const char* s1 = "X11 test app under Mac OS X Lion";
+#else
+static const char* s1 = "X11 test app under Solaris";
+#endif
+static const char* s2 = "(C)2012 Geeks3D.com";
+
+static struct utsname sname;
+static bool uname_ok;
+
+static bool onKeyPress(XEvent *e) {
+    static char buf[128] = {0};
+    KeySym keysym;
+    XLookupString(&e->xkey, buf, sizeof buf, &keysym, NULL);
+    return (keysym == XK_Escape);
+}
+
+static void onExpose(Display *display, const int screen, const Window win) {
+    GC gc = DefaultGC(display, screen);
+    int y_offset = 20;
+
+    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, (char *) s1);
+    y_offset += 20;
+    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, (char *) s2);
+    y_offset += 20;
+    if (uname_ok) {
+        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "System information -->");
+        y_offset += 15;
+
+        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- System: %s", sname.sysname);
+        y_offset += 15;
+
+        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Release: %s", sname.release);
+        y_offset += 15;
+
+        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Version: %s", sname.version);
+        y_offset += 15;
+
+        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Machine: %s", sname.machine);
+        y_offset += 20;
+    }
+
+
+    XWindowAttributes wa;
+    XGetWindowAttributes(display, win, &wa);
+    int width = wa.width;
+    int height = wa.height;
+
+    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "Current window size: %dx%d", width, height);
+    y_offset += 20;
+}
+
 int main(int argc, char** argv) {
-    Display* dpy = XOpenDisplay(NULL);
-    if (dpy == NULL) {
+    Display* display = XOpenDisplay(NULL);
+    if (display == NULL) {
         fprintf(stderr, "Cannot open display\n");
         exit(1);
     }
-    int s = DefaultScreen(dpy);
-    Window win = XCreateSimpleWindow(dpy, RootWindow(dpy, s), 10, 10, 660, 200, 1,
-            BlackPixel(dpy, s), WhitePixel(dpy, s));
-    XSelectInput(dpy, win, ExposureMask | KeyPressMask);
-    XMapWindow(dpy, win);
+    int screen = DefaultScreen(display);
+    Window win = XCreateSimpleWindow(display, RootWindow(display, screen), 10, 10, 660, 200, 1,
+            BlackPixel(display, screen), WhitePixel(display, screen));
+    XSelectInput(display, win, ExposureMask | KeyPressMask);
+    XMapWindow(display, win);
 
-#if defined(__APPLE_CC__)");
-				y_offset += 15;
-    XStoreName(dpy, win, "Geeks3D.com - X11 window under Mac OS X (Lion)");
-#else
-    XStoreName(dpy, win, "Geeks3D.com - X11 window under Linux (Mint 10)");
-#endif
-    Atom WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(dpy, win, &WM_DELETE_WINDOW, 1);
-
-    bool uname_ok = false;
-    struct utsname sname;
-    int ret = uname(&sname);
-    if (ret != -1) {
-        uname_ok = true;
-    }
-    XEvent e;
-    while (1) {
-        XNextEvent(dpy, &e);
-        if (e.type == Expose) {
-            int y_offset = 20;
 #if defined(__APPLE_CC__)
-            const char* s1 = "X11 test app under Mac OS X Lion";
+    y_offset += 15;
+    XStoreName(display, win, "Geeks3D.com - X11 window under Mac OS X (Lion)");
 #else
-            const char* s1 = "X11 test app under Solaris";
+    XStoreName(display, win, "Geeks3D.com - X11 window under Linux (Mint 10)");
 #endif
-            const char* s2 = "(C)2012 Geeks3D.com";
-            XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, (char *) s1);
-            y_offset += 20;
-            XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, (char *) s2);
-            y_offset += 20;
+    Atom WM_DELETE_WINDOW = XInternAtom(display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(display, win, &WM_DELETE_WINDOW, 1);
 
-            if (uname_ok) {
-                XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "System information -->");
-                y_offset += 15;
+    uname_ok = uname(&sname) != -1;
+    XEvent e;
+    bool end = false;
 
-                XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- System: %s", sname.sysname);
-                y_offset += 15;
-
-                XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Release: %s", sname.release);
-                y_offset += 15;
-
-                XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Version: %s", sname.version);
-                y_offset += 15;
-
-                XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "- Machine: %s", sname.machine);
-                y_offset += 20;
-            }
-
-
-            XWindowAttributes wa;
-            XGetWindowAttributes(dpy, win, &wa);
-            int width = wa.width;
-            int height = wa.height;
-
-            XhDrawString(dpy, win, DefaultGC(dpy, s), 10, y_offset, "Current window size: %dx%d", width, height);
-            y_offset += 20;
-        }
-        if (e.type == KeyPress) {
-            char buf[128] = {0};
-            KeySym keysym;
-            int len = XLookupString(&e.xkey, buf, sizeof buf, &keysym, NULL);
-            if (keysym == XK_Escape)
+    while (!end) {
+        XNextEvent(display, &e);
+        switch (e.type) {
+            case Expose:
+                onExpose(display, screen, win);
+                break;
+            case KeyPress:
+                end = onKeyPress(&e);
+                break;
+            case ClientMessage:
+                end = ((unsigned int) (e.xclient.data.l[0]) == WM_DELETE_WINDOW);
                 break;
         }
-
-        if ((e.type == ClientMessage) &&
-                ((unsigned int) (e.xclient.data.l[0]) == WM_DELETE_WINDOW)) {
-            break;
-        }
     }
-    XDestroyWindow(dpy, win);
-    XCloseDisplay(dpy);
+    XDestroyWindow(display, win);
+    XCloseDisplay(display);
     return 0;
 }

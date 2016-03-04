@@ -1,8 +1,8 @@
 /*
- * File:   Xhelper.c
+ * File:   private-Xhelper.c
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
- * Created on 3 mars 2016, 23:24
+ * Created on 4 mars 2016, 18:46
  */
 
 /*
@@ -31,28 +31,46 @@
  */
 
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+#include <X11/Xresource.h>
+#include <X11/keysym.h>
+
 #include <stdio.h>
-#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
+#include <sys/utsname.h>
+
+#include "Xhelper.h"
 #include "private-Xhelper.h"
 
-// int XDrawString(Display *display, Drawable d, GC gc, int x, int y, char *string, int length);
+/*
+typedef struct {
+	Display* display;
+	int screen;
+	Window root_window;
+	Window win;
+	GC gc;
+} TSXconfig;
 
-#define MAX_STR_LEN	512
+ */
 
-int XhDrawString(int x, int y, char *format, ...) {
-    va_list aptr;
-    int ret;
-    char buffer[MAX_STR_LEN + 1];
+TSXconfig xconf_main;
 
-    va_start(aptr, format);
-    ret = vsnprintf(buffer, MAX_STR_LEN, format, aptr);
-    va_end(aptr);
-    buffer[MAX_STR_LEN] = 0;
-    if (ret > 0) {
-        return XDrawString(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, buffer, ret);
-    } else {
-        return 0;
+bool xconf_open(const int x, const int y, const int width, const int height) {
+	xconf_main.display = XOpenDisplay(NULL);
+	if (xconf_main.display == NULL) {
+        fprintf(stderr, "Cannot open display\n");
+        exit(1);
     }
+	xconf_main.screen = DefaultScreen(xconf_main.display);
+	xconf_main.root_window = RootWindow(xconf_main.display, xconf_main.screen);
+    xconf_main.win = XCreateSimpleWindow(xconf_main.display, xconf_main.root_window, x, y, width, height, 1,
+            BlackPixel(xconf_main.display, xconf_main.screen), WhitePixel(xconf_main.display, xconf_main.screen));
+    XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask);
+    XMapWindow(xconf_main.display, xconf_main.win);
+
+	return true;
 }

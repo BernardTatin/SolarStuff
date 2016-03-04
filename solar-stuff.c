@@ -47,6 +47,7 @@
 
 #include <sys/utsname.h>
 
+#include "private-Xhelper.h"
 #include "Xhelper.h"
 
 #if defined(__APPLE_CC__)
@@ -67,70 +68,66 @@ static bool onKeyPress(XEvent *e) {
 }
 
 static void onExpose(Display *display, const int screen, const Window win) {
-    GC gc = DefaultGC(display, screen);
+    GC gc = xconf_init_gc();
     int y_offset = 20;
 
-    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, (char *) s1);
+    XhDrawString(10, y_offset, (char *) s1);
     y_offset += 20;
-    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, (char *) s2);
+    XhDrawString(10, y_offset, (char *) s2);
     y_offset += 20;
     if (uname_ok) {
-        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "System information -->");
+        XhDrawString(10, y_offset, "System information -->");
         y_offset += 15;
 
-        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- System: %s", sname.sysname);
+        XhDrawString(10, y_offset, "- System: %s", sname.sysname);
         y_offset += 15;
 
-        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Release: %s", sname.release);
+        XhDrawString(10, y_offset, "- Release: %s", sname.release);
         y_offset += 15;
 
-        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Version: %s", sname.version);
+        XhDrawString(10, y_offset, "- Version: %s", sname.version);
         y_offset += 15;
 
-        XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "- Machine: %s", sname.machine);
+        XhDrawString(10, y_offset, "- Machine: %s", sname.machine);
         y_offset += 20;
     }
 
 
     XWindowAttributes wa;
-    XGetWindowAttributes(display, win, &wa);
+    XGetWindowAttributes(xconf_main.display, xconf_main.win, &wa);
     int width = wa.width;
     int height = wa.height;
 
-    XhDrawString(display, win, DefaultGC(display, screen), 10, y_offset, "Current window size: %dx%d", width, height);
-    y_offset += 20;
+    XhDrawString(10, y_offset, "Current window size: %dx%d", width, height);
 }
 
 int main(int argc, char** argv) {
-    Display* display = XOpenDisplay(NULL);
-    if (display == NULL) {
-        fprintf(stderr, "Cannot open display\n");
-        exit(1);
-    }
-    int screen = DefaultScreen(display);
-    Window win = XCreateSimpleWindow(display, RootWindow(display, screen), 10, 10, 660, 200, 1,
-            BlackPixel(display, screen), WhitePixel(display, screen));
-    XSelectInput(display, win, ExposureMask | KeyPressMask);
-    XMapWindow(display, win);
+	char buffer[128];
+	xconf_open(100, 100, 660, 200);
+    uname_ok = uname(&sname) != -1;
 
 #if defined(__APPLE_CC__)
     y_offset += 15;
     XStoreName(display, win, "Geeks3D.com - X11 window under Mac OS X (Lion)");
 #else
-    XStoreName(display, win, "Geeks3D.com - X11 window under Linux (Mint 10)");
+	if (uname_ok) {
+		sprintf(buffer, "Geeks3D.com - X11 window under Unix (%s)", sname.sysname);
+	} else {
+		strcpy(buffer, "Geeks3D.com - X11 window under Unix");
+	}
+    XStoreName(xconf_main.display, xconf_main.win, buffer);
 #endif
-    Atom WM_DELETE_WINDOW = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, win, &WM_DELETE_WINDOW, 1);
+    Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
 
-    uname_ok = uname(&sname) != -1;
     XEvent e;
     bool end = false;
 
     while (!end) {
-        XNextEvent(display, &e);
+        XNextEvent(xconf_main.display, &e);
         switch (e.type) {
             case Expose:
-                onExpose(display, screen, win);
+                onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
                 break;
             case KeyPress:
                 end = onKeyPress(&e);
@@ -140,7 +137,6 @@ int main(int argc, char** argv) {
                 break;
         }
     }
-    XDestroyWindow(display, win);
-    XCloseDisplay(display);
+	xconf_close();
     return 0;
 }

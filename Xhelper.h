@@ -8,6 +8,6 @@
 #ifndef XHELPER_H
 #define	XHELPER_H
 
-int XhDrawString(Display *display, Drawable d, GC gc, int x, int y, char *format, ...);
+int XhDrawString(int x, int y, char *format, ...);
 
 #endif	/* XHELPER_H */

@@ -39,7 +39,7 @@ arch = -m64
 # optim = -g
 optim = -xO3
 
-ipath = .
+ipath = -I./include
 CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes
 LDFLAGS = $(arch)
 
@@ -47,7 +47,7 @@ odir = objs$(arch)
 
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
-SRC = $(MAIN).c Xhelper.c private-Xhelper.c
+SRC = $(MAIN).c Xhelper.c Xconf.c
 objs = $(SRC:.c=.o)
 OBJS=$(objs:%=$(odir)/%)
 

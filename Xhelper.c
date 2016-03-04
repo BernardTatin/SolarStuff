@@ -35,7 +35,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "private-Xhelper.h"
+#include "Xconf.h"
 
 // int XDrawString(Display *display, Drawable d, GC gc, int x, int y, char *string, int length);
 

@@ -47,7 +47,7 @@
 
 #include <sys/utsname.h>
 
-#include "private-Xhelper.h"
+#include "Xconf.h"
 #include "Xhelper.h"
 
 #if defined(__APPLE_CC__)

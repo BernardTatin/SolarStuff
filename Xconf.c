@@ -44,7 +44,7 @@
 #include <sys/utsname.h>
 
 #include "Xhelper.h"
-#include "private-Xhelper.h"
+#include "Xconf.h"
 
 /*
 typedef struct {

@@ -31,7 +31,7 @@
 
 CC = cc
 LD = $(CC)
-LIBS = -L/usr/openwin/lib -lXmu -lX11 -lXext
+LIBS = -L/usr/openwin/lib -lX11
 RM = rm -f
 
 arch = -m64

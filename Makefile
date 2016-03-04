@@ -44,12 +44,13 @@ CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes
 LDFLAGS = $(arch)
 
 odir = objs$(arch)
+src = src
 
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
-SRC = $(MAIN).c Xhelper.c Xconf.c
+SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c
 objs = $(SRC:.c=.o)
-OBJS=$(objs:%=$(odir)/%)
+OBJS=$(objs:$(src)/%=$(odir)/%)
 
 all: $(odir) $(EXE)
 
@@ -59,11 +60,11 @@ $(odir):
 $(EXE): $(OBJS)
 		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-$(odir)/%.o: %.c
+$(odir)/%.o: $(src)/%.c
 		$(CC) -c $< -o $@ $(CFLAGS)
 
 test: $(EXE)
-		./$(EXE) LICENSE README.md
+		./$(EXE)
 
 clean:
 		$(RM) $(EXE) $(OBJS)

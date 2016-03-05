@@ -29,10 +29,10 @@
 *.hex
 core
 
+solar-stuff
 solar-stuff-m32
 solar-stuff-m64
-objs-m32
-objs-m64
+objs*/
 
 # Debug files
 *.dSYM/
@@ -42,3 +42,4 @@ objs-m64
 .project
 .cproject
 .*.swp
+*~

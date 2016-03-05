@@ -35,7 +35,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/utsname.h>
+#if defined(__SunOS)
 #include <sys/loadavg.h>
+#endif
+#if defined(__FreeBSD__)
+#include <stdlib.h>
+#define LOADAVG_1MIN 0
+#define LOADAVG_5MIN 1
+#define LOADAVG_15MIN 2
+#endif
 #include <pthread.h>
 
 #include "solar-infos.h"
@@ -69,11 +77,11 @@ static void fill_dynasoli_sysconf(void) {
     time(&tp);
     current_sysconf.tm = localtime(&tp);
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
-    current_sysconf.free_pages = sysconf(_SC_AVPHYS_PAGES);
+    current_sysconf.free_pages = sysconf(_SC_PHYS_PAGES);
 
-    current_sysconf.mem = (longlong_t) ((longlong_t) current_sysconf.num_pages * (longlong_t) current_sysconf.page_size);
+    current_sysconf.mem = (LONGLONG) ((LONGLONG) current_sysconf.num_pages * (LONGLONG) current_sysconf.page_size);
     current_sysconf.mem /= ONE_MB;
-    current_sysconf.free_mem = (longlong_t) current_sysconf.free_pages * (longlong_t) current_sysconf.page_size;
+    current_sysconf.free_mem = (LONGLONG) current_sysconf.free_pages * (LONGLONG) current_sysconf.page_size;
     current_sysconf.free_mem /= ONE_MB;
 	if (getloadavg (current_sysconf.load_av, 3) == -1) {
 		for (int i=0; i<3; i++) {

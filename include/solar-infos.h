@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   solar-infos.h
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
@@ -8,6 +8,13 @@
 #ifndef SOLAR_INFOS_H
 #define	SOLAR_INFOS_H
 
+#if defined __SunOS
+#define LONGLONG	longlong_t
+#endif
+#if defined __FreeBSD__
+#define LONGLONG	long long
+#endif
+
 typedef struct {
 	bool inited;
 
@@ -16,8 +23,8 @@ typedef struct {
 	long page_size;
 	long num_pages;
 	long free_pages;
-	longlong_t mem;
-	longlong_t free_mem;
+	LONGLONG mem;
+	LONGLONG free_mem;
 
 	double load_av [3];
     struct tm *tm;

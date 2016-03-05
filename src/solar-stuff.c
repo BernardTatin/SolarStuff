@@ -49,7 +49,14 @@
 #include <sys/time.h>
 
 #include <sys/utsname.h>
+#if defined(__SunOS)
 #include <sys/loadavg.h>
+#endif
+#if defined(__FreeBSD__)
+#define LOADAVG_1MIN 0
+#define LOADAVG_5MIN 1
+#define LOADAVG_15MIN 2
+#endif
 
 #include "Xconf.h"
 #include "Xhelper.h"

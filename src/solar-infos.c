@@ -32,7 +32,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 #include <sys/loadavg.h>
 #include <pthread.h>
 
@@ -47,17 +49,25 @@ static TSsysconf current_sysconf = {
     .inited = false
 };
 
-TSsysconf *fill_soli_sysconf(void) {
-    time_t tp;
+static TSsysconf display_sysconf;
+static TSsysconf buffer_sysconf;
+static pthread_mutex_t mutex_sysconf = PTHREAD_MUTEX_INITIALIZER;
 
-    time(&tp);
-    current_sysconf.tm = localtime(&tp);
+static void fill_staticsoli_sysconf(void) {
     if (!current_sysconf.inited) {
         current_sysconf.num_procs = sysconf(_SC_NPROCESSORS_CONF);
         current_sysconf.page_size = sysconf(_SC_PAGESIZE);
         current_sysconf.num_pages = sysconf(_SC_PHYS_PAGES);
         current_sysconf.inited = true;
+		current_sysconf.uname_ok = uname(&current_sysconf.sname) != -1;
     }
+}
+
+static void fill_dynasoli_sysconf(void) {
+    time_t tp;
+
+    time(&tp);
+    current_sysconf.tm = localtime(&tp);
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
     current_sysconf.free_pages = sysconf(_SC_AVPHYS_PAGES);
 
@@ -70,32 +80,34 @@ TSsysconf *fill_soli_sysconf(void) {
 			current_sysconf.load_av[i] = -1.0;
 		}
 	}
-	return &current_sysconf;
+	pthread_mutex_lock(&mutex_sysconf);
+	memmove (&display_sysconf, &current_sysconf, sizeof(TSsysconf));
+	pthread_mutex_unlock(&mutex_sysconf);
 }
 
 TSsysconf *soli_sysconf(void) {
-	return &current_sysconf;
+	pthread_mutex_lock(&mutex_sysconf);
+	memmove (&buffer_sysconf, &display_sysconf, sizeof(TSsysconf));
+	pthread_mutex_unlock(&mutex_sysconf);
+	return &buffer_sysconf;
 }
 
 static void *soli_loop(void *arg) {
 	while (!soli_bstop) {
-		fprintf(stdout, "soli_loop\n");
-		fill_soli_sysconf();
+		fill_dynasoli_sysconf();
 		sleep(1);
 	}
-	fprintf(stdout, "soli_loop OUT\n");
 	return NULL;
 }
 
 void soli_start(void) {
-	fill_soli_sysconf();
+	fill_staticsoli_sysconf();
+	fill_dynasoli_sysconf();
 	pthread_create (&soli_thread, NULL, soli_loop, NULL);
 	soli_bstop = false;
 }
 
 void soli_stop(void) {
-	fprintf(stdout, "soli_stop...\n");
 	soli_bstop = true;
-	pthread_join(&soli_thread, NULL);
-	fprintf(stdout, "soli_stop OK.\n");
+	pthread_join(soli_thread, NULL);
 }

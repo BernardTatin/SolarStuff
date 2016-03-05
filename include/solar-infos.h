@@ -22,6 +22,8 @@ typedef struct {
 	double load_av [3];
     struct tm *tm;
 
+	struct utsname sname;
+	bool uname_ok;
 } TSsysconf;
 
 TSsysconf *soli_sysconf(void);

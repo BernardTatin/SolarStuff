@@ -62,9 +62,6 @@ static const char* s1 = "X11 test app under Solaris";
 #endif
 static const char* s2 = "(C)2012 Geeks3D.com";
 
-static struct utsname sname;
-static bool uname_ok;
-
 static int select_fd;
 
 static bool onKeyPress(XEvent *e) {
@@ -84,24 +81,24 @@ static void onExpose(Display *display, const int screen, const Window win) {
     y_offset += 20;
     XhDrawString(x_offset, y_offset, (char *) s2);
     y_offset += 20;
-    /*
-    if (uname_ok) {
+
+    if (sysconf->uname_ok) {
         XhDrawString(x_offset, y_offset, "System information -->");
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- System: %s", sname.sysname);
+        XhDrawString(x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Release: %s", sname.release);
+        XhDrawString(x_offset, y_offset, "- Release: %s", sysconf->sname.release);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Version: %s", sname.version);
+        XhDrawString(x_offset, y_offset, "- Version: %s", sysconf->sname.version);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Machine: %s", sname.machine);
+        XhDrawString(x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
         y_offset += 20;
     }
-     */
+
     x_offset = 250;
     y_offset = 20;
     XhDrawString(x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
@@ -139,18 +136,18 @@ static void send_ExposeEvent(void) {
 
 int main(int argc, char** argv) {
     char buffer[128];
-
+	TSsysconf *sysconf;
 
     xconf_open(100, 100, 660, 200);
-    uname_ok = uname(&sname) != -1;
 	soli_start();
+	sysconf = soli_sysconf();
 
 #if defined(__APPLE_CC__)
     y_offset += 15;
     XStoreName(display, win, "Geeks3D.com - X11 window under Mac OS X (Lion)");
 #else
-    if (uname_ok) {
-        sprintf(buffer, "Geeks3D.com - X11 window under Unix (%s)", sname.sysname);
+    if (sysconf->uname_ok) {
+        sprintf(buffer, "Geeks3D.com - X11 window under Unix (%s)", sysconf->sname.sysname);
     } else {
         strcpy(buffer, "Geeks3D.com - X11 window under Unix");
     }

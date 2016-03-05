@@ -93,9 +93,12 @@ TSsysconf *soli_sysconf(void) {
 }
 
 static void *soli_loop(void *arg) {
+	struct timespec ts;
 	while (!soli_bstop) {
 		fill_dynasoli_sysconf();
-		sleep(1);
+		ts.tv_sec = 0;
+		ts.tv_nsec = 500000000l;
+		nanosleep(&ts, NULL);
 	}
 	return NULL;
 }

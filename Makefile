@@ -36,7 +36,6 @@ RM = rm -f
 
 arch = -m64
 
-# optim = -g
 optim = -xO3
 
 ipath = -I./include
@@ -48,7 +47,7 @@ src = src
 
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
-SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c
+SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c
 objs = $(SRC:.c=.o)
 OBJS=$(objs:$(src)/%=$(odir)/%)
 

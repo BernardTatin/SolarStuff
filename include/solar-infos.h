@@ -20,10 +20,14 @@ typedef struct {
 	longlong_t free_mem;
 
 	double load_av [3];
+    struct tm *tm;
+
 } TSsysconf;
 
 TSsysconf *soli_sysconf(void);
 
+void soli_start(void);
+void soli_stop(void);
 
 #endif	/* SOLAR_INFOS_H */
 

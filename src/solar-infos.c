@@ -30,19 +30,28 @@
 
  */
 
+#include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/loadavg.h>
+#include <pthread.h>
 
 #include "solar-infos.h"
 
 #define ONE_MB (1024 * 1024)
 
+static bool soli_bstop = false;
+static pthread_t soli_thread;
+
 static TSsysconf current_sysconf = {
     .inited = false
 };
 
-TSsysconf *soli_sysconf(void) {
+TSsysconf *fill_soli_sysconf(void) {
+    time_t tp;
+
+    time(&tp);
+    current_sysconf.tm = localtime(&tp);
     if (!current_sysconf.inited) {
         current_sysconf.num_procs = sysconf(_SC_NPROCESSORS_CONF);
         current_sysconf.page_size = sysconf(_SC_PAGESIZE);
@@ -62,4 +71,31 @@ TSsysconf *soli_sysconf(void) {
 		}
 	}
 	return &current_sysconf;
+}
+
+TSsysconf *soli_sysconf(void) {
+	return &current_sysconf;
+}
+
+static void *soli_loop(void *arg) {
+	while (!soli_bstop) {
+		fprintf(stdout, "soli_loop\n");
+		fill_soli_sysconf();
+		sleep(1);
+	}
+	fprintf(stdout, "soli_loop OUT\n");
+	return NULL;
+}
+
+void soli_start(void) {
+	fill_soli_sysconf();
+	pthread_create (&soli_thread, NULL, soli_loop, NULL);
+	soli_bstop = false;
+}
+
+void soli_stop(void) {
+	fprintf(stdout, "soli_stop...\n");
+	soli_bstop = true;
+	pthread_join(&soli_thread, NULL);
+	fprintf(stdout, "soli_stop OK.\n");
 }

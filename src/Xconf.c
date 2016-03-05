@@ -78,13 +78,13 @@ bool xconf_open(const int x, const int y, const int width, const int height) {
     xconf_main.win = XCreateWindow(xconf_main.display, xconf_main.root_window, x, y, width, height, 5, depth, InputOutput,
             visual, CWBackPixel, &attributes);
 
-    XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask);
+    XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask | GCGraphicsExposures);
     xconf_main.gr_values.function = GXcopy;
     xconf_main.gr_values.plane_mask = AllPlanes;
     xconf_main.gr_values.foreground = BlackPixel(xconf_main.display, xconf_main.screen);
     xconf_main.gr_values.background = WhitePixel(xconf_main.display, xconf_main.screen);
     xconf_main.gr_context = XCreateGC(xconf_main.display, xconf_main.win,
-            GCFunction | GCPlaneMask | GCForeground | GCBackground,
+            GCClipMask | GCFunction | GCPlaneMask | GCForeground | GCBackground | GCGraphicsExposures,
             &xconf_main.gr_values);
 
 	xconf_main.gc = xconf_main.gr_context;

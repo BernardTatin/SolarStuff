@@ -65,6 +65,8 @@ static const char* s2 = "(C)2012 Geeks3D.com";
 static struct utsname sname;
 static bool uname_ok;
 
+static int select_fd;
+
 static bool onKeyPress(XEvent *e) {
     static char buf[128] = {0};
     KeySym keysym;
@@ -73,20 +75,16 @@ static bool onKeyPress(XEvent *e) {
 }
 
 static void onExpose(Display *display, const int screen, const Window win) {
-    // GC gc = xconf_init_gc();
+    xconf_init_gc();
     int x_offset = 10;
     int y_offset = 20;
     TSsysconf *sysconf = soli_sysconf();
-    time_t tp;
-    struct tm *tm;
 
-    time(&tp);
-    tm = localtime(&tp);
-	// XClearWindow(xconf_main.display, xconf_main.win);
     XhDrawString(x_offset, y_offset, (char *) s1);
     y_offset += 20;
     XhDrawString(x_offset, y_offset, (char *) s2);
     y_offset += 20;
+    /*
     if (uname_ok) {
         XhDrawString(x_offset, y_offset, "System information -->");
         y_offset += 15;
@@ -103,15 +101,7 @@ static void onExpose(Display *display, const int screen, const Window win) {
         XhDrawString(x_offset, y_offset, "- Machine: %s", sname.machine);
         y_offset += 20;
     }
-
-
-    XWindowAttributes wa;
-    XGetWindowAttributes(xconf_main.display, xconf_main.win, &wa);
-    int width = wa.width;
-    int height = wa.height;
-
-    XhDrawString(x_offset, y_offset, "Current window size: %dx%d", width, height);
-
+     */
     x_offset = 250;
     y_offset = 20;
     XhDrawString(x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
@@ -121,19 +111,39 @@ static void onExpose(Display *display, const int screen, const Window win) {
     y_offset += 20;
     XhDrawString(x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
     y_offset += 20;
-    XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
+    XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
+}
+
+static int do_select(void) {
+    static struct timeval select_time_val;
+    static fd_set select_rfds;
+
+    memset(&select_time_val, 0, sizeof (select_time_val));
+    select_time_val.tv_sec = 1;
+    select_time_val.tv_usec = 0;
+    FD_ZERO(&select_rfds);
+    FD_SET(select_fd, &select_rfds);
+    return select(select_fd + 1, &select_rfds, NULL, NULL, &select_time_val);
+}
+
+static void send_ExposeEvent(void) {
+    static XExposeEvent ee;
+    memset(&ee, 0, sizeof (XExposeEvent));
+    ee.type = Expose;
+    ee.display = xconf_main.display;
+    ee.window = xconf_main.win;
+    ee.width = 660;
+    ee.height = 220;
+    XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *)&ee);
 }
 
 int main(int argc, char** argv) {
     char buffer[128];
-    int fd;
-    struct timeval tv;
-    fd_set rfds;
 
 
     xconf_open(100, 100, 660, 200);
     uname_ok = uname(&sname) != -1;
-
+	soli_start();
 
 #if defined(__APPLE_CC__)
     y_offset += 15;
@@ -149,30 +159,28 @@ int main(int argc, char** argv) {
     Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
 
-    XEvent e, send_event;
+    XEvent e;
     bool end = false;
 
-    fd = ConnectionNumber(xconf_main.display);
+    select_fd = ConnectionNumber(xconf_main.display);
 
-    memset(&tv, 0, sizeof (tv));
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    FD_ZERO(&rfds);
-    FD_SET(fd, &rfds);
     XFlush(xconf_main.display);
     while (!end) {
-		fprintf(stdout, "select...\n");
-        if (select(fd + 1, &rfds, NULL, NULL, &tv)) {
-            fprintf(stdout, "select out\n");
+        if (do_select()) {
             while (XPending(xconf_main.display)) {
                 XNextEvent(xconf_main.display, &e);
                 switch (e.type) {
+                    case NoExpose:
+                        break;
+                    case GraphicsExpose:
+                        break;
+                    case VisibilityNotify:
+                        XClearArea(xconf_main.display, xconf_main.win, 0, 0, 0, 1, True);
+                        break;
                     case Expose:
-                        fprintf(stdout, "EVT Expose... (%d)\n", (int)e.xexpose.count);
-						if (e.xexpose.count == 0) {
-							onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
-						}
-                        fprintf(stdout, "EVT Expose OK\n");
+                        if (e.xexpose.count == 0) {
+                            onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
+                        }
                         break;
                     case KeyPress:
                         end = onKeyPress(&e);
@@ -182,25 +190,12 @@ int main(int argc, char** argv) {
                         break;
                 }
             }
-            fprintf(stdout, "select end!!!\n");
         } else {
-			XClearArea(xconf_main.display, xconf_main.win, 0, 0, 1, 1, True);
-			/*
-			memset(&send_event, 0, sizeof(send_event));
-			send_event.type = Expose;
-			XSendEvent(xconf_main.display, xconf_main.win, true, ExposureMask, &send_event);
-			*/
-            fprintf(stdout, "select send\n");
-			// XFlush(xconf_main.display);
-		}
-		memset(&tv, 0, sizeof(tv));
-        tv.tv_sec = 1;
-        tv.tv_usec = 0;
-		fd = ConnectionNumber(xconf_main.display);
-        FD_ZERO(&rfds);
-        FD_SET(fd, &rfds);
+            send_ExposeEvent();
+        }
         XFlush(xconf_main.display);
     }
+	soli_stop();
     xconf_close();
     return 0;
 }

@@ -31,7 +31,7 @@
 
 CC = cc
 LD = $(CC)
-LIBS = -L/usr/openwin/lib -lX11
+LIBS = -L/usr/openwin/lib -lX11 -lpthread
 RM = rm -f
 
 arch = -m64
@@ -39,7 +39,7 @@ arch = -m64
 optim = -xO3
 
 ipath = -I./include
-CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes
+CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes -D_REENTRANT
 LDFLAGS = $(arch)
 
 odir = objs$(arch)

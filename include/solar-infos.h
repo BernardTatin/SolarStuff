@@ -8,12 +8,6 @@
 #ifndef SOLAR_INFOS_H
 #define	SOLAR_INFOS_H
 
-#if defined __SunOS
-#define LONGLONG	longlong_t
-#endif
-#if defined __FreeBSD__
-#define LONGLONG	long long
-#endif
 
 typedef struct {
 	bool inited;

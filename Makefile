@@ -38,7 +38,7 @@ arch = -m64
 
 optim = -xO3
 
-ipath = -I./include
+ipath = -I./include -I./solaris
 CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes -D_REENTRANT
 LDFLAGS = $(arch)
 

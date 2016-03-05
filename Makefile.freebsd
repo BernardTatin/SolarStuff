@@ -36,7 +36,7 @@ RM = rm -fv
 
 optim = -O3
 
-ipath = -I./include
+ipath = -I./include -I./freebsd
 CFLAGS += -std=c99 $(arch) $(optim) $(ipath) -Wall -pedantic -D_REENTRANT
 LDFLAGS +=
 LDADD += $(LIBS)

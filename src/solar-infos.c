@@ -34,17 +34,11 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/utsname.h>
-#if defined(__SunOS)
-#include <sys/loadavg.h>
-#endif
-#if defined(__FreeBSD__)
-#include <stdlib.h>
-#define LOADAVG_1MIN 0
-#define LOADAVG_5MIN 1
-#define LOADAVG_15MIN 2
-#endif
 #include <pthread.h>
+#include <sys/utsname.h>
+
+#include "compat.h"
+
 
 #include "solar-infos.h"
 

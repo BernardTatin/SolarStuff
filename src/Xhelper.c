@@ -51,7 +51,7 @@ int XhDrawString(int x, int y, char *format, ...) {
     va_end(aptr);
     buffer[MAX_STR_LEN] = 0;
     if (ret > 0) {
-        return XDrawString(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, buffer, ret);
+        return XDrawImageString(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, buffer, ret);
     } else {
         return 0;
     }

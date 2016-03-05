@@ -43,34 +43,52 @@
 
 #include <sys/utsname.h>
 
-#include "Xhelper.h"
 #include "Xconf.h"
+#include "Xhelper.h"
 
 /*
 typedef struct {
-	Display* display;
-	int screen;
-	Window root_window;
-	Window win;
-	GC gc;
+    Display* display;
+    int screen;
+    Window root_window;
+    Window win;
+    GC gc;
 } TSXconfig;
 
  */
 
 TSXconfig xconf_main;
+static XSetWindowAttributes attributes;
 
 bool xconf_open(const int x, const int y, const int width, const int height) {
-	xconf_main.display = XOpenDisplay(NULL);
-	if (xconf_main.display == NULL) {
+    Visual *visual;
+    int depth;
+
+    memset(&attributes, 0, sizeof (XSetWindowAttributes));
+    xconf_main.display = XOpenDisplay(NULL);
+    if (xconf_main.display == NULL) {
         fprintf(stderr, "Cannot open display\n");
         exit(1);
     }
-	xconf_main.screen = DefaultScreen(xconf_main.display);
-	xconf_main.root_window = RootWindow(xconf_main.display, xconf_main.screen);
-    xconf_main.win = XCreateSimpleWindow(xconf_main.display, xconf_main.root_window, x, y, width, height, 1,
-            BlackPixel(xconf_main.display, xconf_main.screen), WhitePixel(xconf_main.display, xconf_main.screen));
+    xconf_main.screen = DefaultScreen(xconf_main.display);
+    attributes.background_pixel = XWhitePixel(xconf_main.display, xconf_main.screen);
+    visual = DefaultVisual(xconf_main.display, xconf_main.screen);
+    depth = DefaultDepth(xconf_main.display, xconf_main.screen);
+    xconf_main.root_window = RootWindow(xconf_main.display, xconf_main.screen);
+    xconf_main.win = XCreateWindow(xconf_main.display, xconf_main.root_window, x, y, width, height, 5, depth, InputOutput,
+            visual, CWBackPixel, &attributes);
+
     XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask);
+    xconf_main.gr_values.function = GXcopy;
+    xconf_main.gr_values.plane_mask = AllPlanes;
+    xconf_main.gr_values.foreground = BlackPixel(xconf_main.display, xconf_main.screen);
+    xconf_main.gr_values.background = WhitePixel(xconf_main.display, xconf_main.screen);
+    xconf_main.gr_context = XCreateGC(xconf_main.display, xconf_main.win,
+            GCFunction | GCPlaneMask | GCForeground | GCBackground,
+            &xconf_main.gr_values);
+
+	xconf_main.gc = xconf_main.gr_context;
     XMapWindow(xconf_main.display, xconf_main.win);
 
-	return true;
+    return true;
 }

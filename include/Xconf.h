@@ -14,6 +14,8 @@ typedef struct {
 	Window root_window;
 	Window win;
 	GC gc;
+	XGCValues gr_values; 
+	GC gr_context;
 } TSXconfig;
 
 extern TSXconfig xconf_main;
@@ -22,6 +24,7 @@ bool xconf_open(const int x, const int y, const int width, const int height);
 
 static inline GC xconf_init_gc(void) {
 	xconf_main.gc = DefaultGC(xconf_main.display, xconf_main.screen);
+	xconf_main.gc = xconf_main.gr_context;
 	return xconf_main.gc;
 }
 

@@ -73,7 +73,7 @@ static bool onKeyPress(XEvent *e) {
 }
 
 static void onExpose(Display *display, const int screen, const Window win) {
-    GC gc = xconf_init_gc();
+    // GC gc = xconf_init_gc();
     int x_offset = 10;
     int y_offset = 20;
     TSsysconf *sysconf = soli_sysconf();
@@ -82,7 +82,7 @@ static void onExpose(Display *display, const int screen, const Window win) {
 
     time(&tp);
     tm = localtime(&tp);
-
+	// XClearWindow(xconf_main.display, xconf_main.win);
     XhDrawString(x_offset, y_offset, (char *) s1);
     y_offset += 20;
     XhDrawString(x_offset, y_offset, (char *) s2);
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
     Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
 
-    XEvent e;
+    XEvent e, send_event;
     bool end = false;
 
     fd = ConnectionNumber(xconf_main.display);
@@ -163,14 +163,15 @@ int main(int argc, char** argv) {
     while (!end) {
 		fprintf(stdout, "select...\n");
         if (select(fd + 1, &rfds, NULL, NULL, &tv)) {
-			// XClearArea(xconf_main.display, xconf_main.win, 0, 0, 0, 0, True);
             fprintf(stdout, "select out\n");
             while (XPending(xconf_main.display)) {
                 XNextEvent(xconf_main.display, &e);
                 switch (e.type) {
                     case Expose:
-                        fprintf(stdout, "EVT Expose...\n");
-                        onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
+                        fprintf(stdout, "EVT Expose... (%d)\n", (int)e.xexpose.count);
+						if (e.xexpose.count == 0) {
+							onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
+						}
                         fprintf(stdout, "EVT Expose OK\n");
                         break;
                     case KeyPress:
@@ -183,8 +184,14 @@ int main(int argc, char** argv) {
             }
             fprintf(stdout, "select end!!!\n");
         } else {
-			XClearArea(xconf_main.display, xconf_main.win, 0, 0, 0, 0, True);
+			XClearArea(xconf_main.display, xconf_main.win, 0, 0, 1, 1, True);
+			/*
+			memset(&send_event, 0, sizeof(send_event));
+			send_event.type = Expose;
+			XSendEvent(xconf_main.display, xconf_main.win, true, ExposureMask, &send_event);
+			*/
             fprintf(stdout, "select send\n");
+			// XFlush(xconf_main.display);
 		}
 		memset(&tv, 0, sizeof(tv));
         tv.tv_sec = 1;

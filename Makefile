@@ -34,17 +34,17 @@ os = $(shell uname)
 ifeq ($(os), SunOS)
 	CC ?= cc
 	LIBS = -L/usr/openwin/lib -lrt
-	arch = -m64
-	optim = -xO3
+	arch ?= -m64
+	optim ?= -xO3
 	CFLAGS += -errtags=yes -std=c11
 	ipath = -I./solaris
 else ifeq ($(os), FreeBSD)
 	CC ?= gcc
-	arch =
-	optim = -O3
+	LIBS = -L/usr/local/lib
+	arch ?= -m32
+	optim ?= -O3
 	CFLAGS += -Wall -pedantic -std=c99
 	ipath = -I/usr/local/include -I./freebsd
-	LIBS = -L/usr/local/lib
 endif
 
 LD = $(CC)
@@ -61,6 +61,7 @@ src = src
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
 SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c
+
 objs = $(SRC:.c=.o)
 OBJS=$(objs:$(src)/%=$(odir)/%)
 

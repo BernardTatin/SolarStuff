@@ -36,15 +36,38 @@ RM = rm -fv
 
 optim = -O3
 
-ipath = -I./include -I./freebsd
-CFLAGS += -std=c99 $(arch) $(optim) $(ipath) -Wall -pedantic -D_REENTRANT
-LDFLAGS +=
+INCDIR = -I${PWD}/include -I${PWD}/freebsd
+CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
+#LDFLAGS +=
 LDADD += $(LIBS)
-src = src
+
+SRCDIR = ${PWD}/src
+OBJDIR = ${PWD}/objs
+BINDIR = ${PWD}/bin
 
 
 MAIN = solar-stuff
-PROG = $(MAIN)
-SRCS = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c
+PROG = ${BINDIR}/$(MAIN)
+C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c
+SRCS = $(C_SRC)
+INSTALL_DIR    = $(BINDIR)
+
+
 
 .include <bsd.prog.mk>
+
+#all: ${PROG}
+
+#${PROG}: ${OBJS}
+#${CC} -o ${PROG} ${OBJS} ${LIBS}
+
+#clean:
+#@echo "OBJS : ${OBJS}"
+#${RM} ${PROG} ${OBJS}
+
+#${OBJDIR}/%.o:${SRCDIR}/%.c
+#${CC} -c ${CFLAGS} $< -o $@
+
+#.include <bsd.obj.mk>
+#.include <bsd.prog.mk>
+

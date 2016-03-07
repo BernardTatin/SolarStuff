@@ -36,21 +36,24 @@ ifeq ($(os), SunOS)
 	LIBS = -L/usr/openwin/lib -lrt
 	arch = -m64
 	optim = -xO3
-	CFLAGS += -errtags=yes 
+	CFLAGS += -errtags=yes -std=c11
+	ipath = -I./solaris
 else ifeq ($(os), FreeBSD)
 	CC ?= gcc
-	arch = -m64
+	arch =
 	optim = -O3
-	CFLAGS += -Wall -pedantic
+	CFLAGS += -Wall -pedantic -std=c99
+	ipath = -I/usr/local/include -I./freebsd
+	LIBS = -L/usr/local/lib
 endif
 
 LD = $(CC)
 LIBS += -lX11 -lpthread
 RM = rm -f
 
-ipath = -I./include -I./solaris
-CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -D_REENTRANT
-LDFLAGS = $(arch)
+ipath += -I./include
+CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
+LDFLAGS += $(arch)
 
 odir = objs$(arch)
 src = src

@@ -29,18 +29,31 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-CC = cc
+os = $(shell uname)
+
+ifeq ($(os), SunOS)
+	CC ?= cc
+	LIBS = -L/usr/openwin/lib -lrt
+	arch = -m64
+	optim = -xO3
+	CFLAGS += -errtags=yes -std=c11
+	ipath = -I./solaris
+else ifeq ($(os), FreeBSD)
+	CC ?= gcc
+	arch =
+	optim = -O3
+	CFLAGS += -Wall -pedantic -std=c99
+	ipath = -I/usr/local/include -I./freebsd
+	LIBS = -L/usr/local/lib
+endif
+
 LD = $(CC)
-LIBS = -L/usr/openwin/lib -lX11 -lpthread -lrt
+LIBS += -lX11 -lpthread
 RM = rm -f
 
-arch = -m64
-
-optim = -xO3
-
-ipath = -I./include -I./solaris
-CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes -D_REENTRANT
-LDFLAGS = $(arch)
+ipath += -I./include
+CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
+LDFLAGS += $(arch)
 
 odir = objs$(arch)
 src = src
@@ -68,3 +81,5 @@ test: $(EXE)
 clean:
 		$(RM) $(EXE) $(OBJS)
 		$(RM) a.out core
+
+.PHONY: all test clean

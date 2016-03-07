@@ -1,5 +1,5 @@
 ## ======================================================================
-## Makefile.freebsd
+## Makefile
 ## SolarStuff project
 ## Author: Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
@@ -29,45 +29,42 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-CC = gcc46
+CC = cc
 LD = $(CC)
-LIBS = -lX11 -lpthread -lrt
-RM = rm -fv
+LIBS = -L/usr/openwin/lib -lX11 -lpthread -lrt
+RM = rm -f
 
-optim = -O3
+arch = -m64
 
-INCDIR = -I${PWD}/include -I${PWD}/freebsd
-CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
-#LDFLAGS +=
-LDADD += $(LIBS)
+optim = -xO3
 
-SRCDIR = ${PWD}/src
-OBJDIR = ${PWD}/objs
-BINDIR = ${PWD}/bin
+ipath = -I./include -I./solaris
+CFLAGS = -std=c11 $(arch) $(optim) $(ipath) -errtags=yes -D_REENTRANT
+LDFLAGS = $(arch)
 
+odir = objs$(arch)
+src = src
 
 MAIN = solar-stuff
-PROG = ${BINDIR}/$(MAIN)
-C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c
-SRCS = $(C_SRC)
-INSTALL_DIR    = $(BINDIR)
+EXE = $(MAIN)$(arch)
+SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c
+objs = $(SRC:.c=.o)
+OBJS=$(objs:$(src)/%=$(odir)/%)
 
+all: $(odir) $(EXE)
 
+$(odir):
+	mkdir -p $@
 
-.include <bsd.prog.mk>
+$(EXE): $(OBJS)
+		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-#all: ${PROG}
+$(odir)/%.o: $(src)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
 
-#${PROG}: ${OBJS}
-#${CC} -o ${PROG} ${OBJS} ${LIBS}
+test: $(EXE)
+		./$(EXE)
 
-#clean:
-#@echo "OBJS : ${OBJS}"
-#${RM} ${PROG} ${OBJS}
-
-#${OBJDIR}/%.o:${SRCDIR}/%.c
-#${CC} -c ${CFLAGS} $< -o $@
-
-#.include <bsd.obj.mk>
-#.include <bsd.prog.mk>
-
+clean:
+		$(RM) $(EXE) $(OBJS)
+		$(RM) a.out core

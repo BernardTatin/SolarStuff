@@ -72,44 +72,49 @@ static bool onKeyPress(XEvent *e) {
     return (keysym == XK_Escape);
 }
 
-static void onExpose(Display *display, const int screen, const Window win) {
+static void onExposeChild(void) {
+    XhDrawString(xconf_main.chid, 10, 12, "child window");
+    fprintf(stdout, "onExposeChild");
+}
+
+static void onExposeMainWindow(Display *display, const int screen, const Window win) {
     xconf_init_gc();
     int x_offset = 10;
     int y_offset = 20;
     TSsysconf *sysconf = soli_sysconf();
 
-    XhDrawString(x_offset, y_offset, (char *) s1);
+    XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s1);
     y_offset += 20;
-    XhDrawString(x_offset, y_offset, (char *) s2);
+    XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s2);
     y_offset += 20;
 
     if (sysconf->uname_ok) {
-        XhDrawString(x_offset, y_offset, "System information -->");
+        XhDrawString(xconf_main.win, x_offset, y_offset, "System information -->");
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
+        XhDrawString(xconf_main.win, x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Release: %s", sysconf->sname.release);
+        XhDrawString(xconf_main.win, x_offset, y_offset, "- Release: %s", sysconf->sname.release);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Version: %s", sysconf->sname.version);
+        XhDrawString(xconf_main.win, x_offset, y_offset, "- Version: %s", sysconf->sname.version);
         y_offset += 15;
 
-        XhDrawString(x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
+        XhDrawString(xconf_main.win, x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
         y_offset += 20;
     }
 
     x_offset = 250;
     y_offset = 20;
-    XhDrawString(x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
+    XhDrawString(xconf_main.win, x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
             (sysconf->num_procs > 1) ? "s" : "", sysconf->procs_online);
     y_offset += 20;
-    XhDrawString(x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
+    XhDrawString(xconf_main.win, x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
     y_offset += 20;
-    XhDrawString(x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
+    XhDrawString(xconf_main.win, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
     y_offset += 20;
-    XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
+    XhDrawString(xconf_main.win, x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
 static int do_select(void) {
@@ -132,16 +137,16 @@ static void send_ExposeEvent(void) {
     ee.window = xconf_main.win;
     ee.width = 660;
     ee.height = 220;
-    XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *)&ee);
+    XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *) & ee);
 }
 
 int main(int argc, char** argv) {
     char buffer[128];
-	TSsysconf *sysconf;
+    TSsysconf *sysconf;
 
     xconf_open(100, 100, 660, 200);
-	soli_start();
-	sysconf = soli_sysconf();
+    soli_start();
+    sysconf = soli_sysconf();
 
 #if defined(__APPLE_CC__)
     y_offset += 15;
@@ -177,7 +182,11 @@ int main(int argc, char** argv) {
                         break;
                     case Expose:
                         if (e.xexpose.count == 0) {
-                            onExpose(xconf_main.display, xconf_main.screen, xconf_main.win);
+                            if (e.xexpose.window == xconf_main.win) {
+                                onExposeMainWindow(xconf_main.display, xconf_main.screen, xconf_main.win);
+                            } else {
+                                onExposeChild();
+                            }
                         }
                         break;
                     case KeyPress:
@@ -193,7 +202,7 @@ int main(int argc, char** argv) {
         }
         XFlush(xconf_main.display);
     }
-	soli_stop();
+    soli_stop();
     xconf_close();
     return 0;
 }

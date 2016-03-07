@@ -46,16 +46,6 @@
 #include "Xconf.h"
 #include "Xhelper.h"
 
-/*
-typedef struct {
-    Display* display;
-    int screen;
-    Window root_window;
-    Window win;
-    GC gc;
-} TSXconfig;
-
- */
 
 TSXconfig xconf_main;
 static XSetWindowAttributes attributes;
@@ -78,7 +68,7 @@ bool xconf_open(const int x, const int y, const int width, const int height) {
     xconf_main.win = XCreateWindow(xconf_main.display, xconf_main.root_window, x, y, width, height, 5, depth, InputOutput,
             visual, CWBackPixel, &attributes);
 
-    XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask | GCGraphicsExposures);
+    XSelectInput(xconf_main.display, xconf_main.win, ExposureMask | KeyPressMask | GCGraphicsExposures | SubstructureNotifyMask);
     xconf_main.gr_values.function = GXcopy;
     xconf_main.gr_values.plane_mask = AllPlanes;
     xconf_main.gr_values.foreground = BlackPixel(xconf_main.display, xconf_main.screen);
@@ -87,8 +77,13 @@ bool xconf_open(const int x, const int y, const int width, const int height) {
             GCClipMask | GCFunction | GCPlaneMask | GCForeground | GCBackground | GCGraphicsExposures,
             &xconf_main.gr_values);
 
-	xconf_main.gc = xconf_main.gr_context;
+    xconf_main.gc = xconf_main.gr_context;
     XMapWindow(xconf_main.display, xconf_main.win);
 
+    xconf_main.chid = XCreateSimpleWindow(xconf_main.display, xconf_main.win, 10, 170, 640, 20, 0, 0,
+            WhitePixel(xconf_main.display, xconf_main.screen));
+    XSelectInput(xconf_main.display, xconf_main.chid, ExposureMask);
+    XMapWindow(xconf_main.display, xconf_main.chid);
+    xconf_main.chid_on = true;
     return true;
 }

@@ -36,12 +36,13 @@
 #include <stdbool.h>
 
 #include "Xconf.h"
+#include "Xhelper.h"
 
 // int XDrawString(Display *display, Drawable d, GC gc, int x, int y, char *string, int length);
 
 #define MAX_STR_LEN	512
 
-int XhDrawString(int x, int y, char *format, ...) {
+int XhDrawString(const Window win, int x, int y, char *format, ...) {
     va_list aptr;
     int ret;
     char buffer[MAX_STR_LEN + 1];
@@ -51,7 +52,7 @@ int XhDrawString(int x, int y, char *format, ...) {
     va_end(aptr);
     buffer[MAX_STR_LEN] = 0;
     if (ret > 0) {
-        return XDrawImageString(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, buffer, ret);
+        return XDrawImageString(xconf_main.display, win, xconf_main.gc, x, y, buffer, ret);
     } else {
         return 0;
     }

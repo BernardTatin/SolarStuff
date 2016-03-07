@@ -16,6 +16,9 @@ typedef struct {
 	GC gc;
 	XGCValues gr_values; 
 	GC gr_context;
+
+	Window chid;
+	bool chid_on;
 } TSXconfig;
 
 extern TSXconfig xconf_main;

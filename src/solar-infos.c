@@ -71,7 +71,11 @@ static void fill_dynasoli_sysconf(void) {
     time(&tp);
     current_sysconf.tm = localtime(&tp);
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
+#if defined(__SunOS)
+    current_sysconf.free_pages = sysconf(_SC_AVPHYS_PAGES);
+#elif defined(__FreeBSD__)
     current_sysconf.free_pages = sysconf(_SC_PHYS_PAGES);
+#endif
 
     current_sysconf.mem = (LONGLONG) ((LONGLONG) current_sysconf.num_pages * (LONGLONG) current_sysconf.page_size);
     current_sysconf.mem /= ONE_MB;

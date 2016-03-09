@@ -73,7 +73,7 @@ static bool onKeyPress(XEvent *e) {
 }
 
 static void onExposeChild(void) {
-    XhDrawString(xconf_main.chid, 10, 12, "child window");
+    XhDrawString(xconf_main.childStatus, 10, 12, "child window");
     fprintf(stdout, "onExposeChild");
 }
 

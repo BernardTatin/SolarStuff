@@ -80,10 +80,9 @@ bool xconf_open(const int x, const int y, const int width, const int height) {
     xconf_main.gc = xconf_main.gr_context;
     XMapWindow(xconf_main.display, xconf_main.win);
 
-    xconf_main.chid = XCreateSimpleWindow(xconf_main.display, xconf_main.win, 10, 170, 640, 20, 0, 0,
+    xconf_main.childStatus = XCreateSimpleWindow(xconf_main.display, xconf_main.win, 10, 170, 640, 20, 0, 0,
             WhitePixel(xconf_main.display, xconf_main.screen));
-    XSelectInput(xconf_main.display, xconf_main.chid, ExposureMask);
-    XMapWindow(xconf_main.display, xconf_main.chid);
-    xconf_main.chid_on = true;
+    XSelectInput(xconf_main.display, xconf_main.childStatus, ExposureMask);
+    XMapWindow(xconf_main.display, xconf_main.childStatus);
     return true;
 }

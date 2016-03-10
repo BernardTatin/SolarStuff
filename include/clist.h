@@ -1,8 +1,8 @@
 /* 
- * File:   Xhelper.h
+ * File:   clist.h
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
- * Created on 3 mars 2016, 23:38
+ * Created on 10 mars 2016, 21:57
  */
 /*
     The MIT License (MIT)
@@ -30,12 +30,10 @@
  */
 
 
-#ifndef XHELPER_H
-#define	XHELPER_H
+#ifndef CLIST_H
+#define	CLIST_H
 
-int XhDrawString(const Window win, const int x, const int y, char *format, ...);
 
-static inline void XhFillRectangle(const int x, const int y, const int width, const int height) {
-	XFillRectangle(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, width, height);
-}
-#endif	/* XHELPER_H */
+
+#endif	/* CLIST_H */
+

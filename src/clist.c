@@ -1,9 +1,10 @@
-/* 
- * File:   clist.h
+/*
+ * File:   clist.c
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
- * Created on 10 mars 2016, 21:57
+ * Created on 10 mars 2016, 22:12
  */
+
 /*
     The MIT License (MIT)
 
@@ -29,36 +30,21 @@
 
  */
 
+#include <stdlib.h>
+#include <stdbool.h>
 
-#ifndef CLIST_H
-#define	CLIST_H
+#include "clist.h"
 
-typedef struct _TScl_element {
-	void *value;
-
-	struct _TScl_element *next;
-} TScl_element;
-
-static inline TScl_element *cl_elt_new(void *value) {
-	TScl_element *elt = (TScl_element *)calloc(1, sizeof(TScl_element));
-
-	elt->value = value;
-	elt->next = NULL;
+TScl_list *cl_list_new(void) {
+	TScl_list *list = (TScl_list *)calloc(1, sizeof(TScl_list));
+	return list;
 }
 
-typedef struct _TScl_list {
-	TScl_element *first;
-} TScl_list;
+void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt)) {
+	TScl_element *elt = list->first;
 
-TScl_list *cl_list_new(void);
-void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt));
-
-static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
-	if (list->first != NULL) {
-		elt->next = list->first;
+	while (elt != NULL) {
+		on_element(elt);
+		elt = elt->next;
 	}
-	list->first = elt;
 }
-
-#endif	/* CLIST_H */
-

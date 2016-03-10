@@ -48,7 +48,7 @@ BINDIR = ${PWD}/bin
 
 MAIN = solar-stuff
 PROG = ${BINDIR}/$(MAIN)
-C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c
+C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c $(SRCDIR)/clist.c
 SRCS = $(C_SRC)
 INSTALL_DIR    = $(BINDIR)
 

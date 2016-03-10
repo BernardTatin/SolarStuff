@@ -47,7 +47,7 @@ src = src
 
 MAIN = solar-stuff
 EXE = $(MAIN)$(arch)
-SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c
+SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c $(src)/clist.c
 objs = $(SRC:.c=.o)
 OBJS=$(objs:$(src)/%=$(odir)/%)
 

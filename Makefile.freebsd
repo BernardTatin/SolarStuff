@@ -29,8 +29,11 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
+MK_DEBUG_FILES = no
+MK_MAN = no
+
 CC = gcc
-LD = $(CC)
+# LD = $(CC)
 LIBS = -lX11 -lpthread -lrt
 RM = rm -fv
 
@@ -48,13 +51,14 @@ BINDIR = ${HERE}/bin
 
 
 MAIN = solar-stuff
-#PROG = ${BINDIR}/$(MAIN)
-PROG = $(MAIN)
+PROG = ${BINDIR}/$(MAIN)
+# PROG = $(MAIN)
 C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c $(SRCDIR)/clist.c
 SRCS = $(C_SRC)
 INSTALL_DIR    = $(BINDIR)
 
-
+${BINDIR}:
+	mkdir -p ${BINDIR}
 
 .include <bsd.prog.mk>
 

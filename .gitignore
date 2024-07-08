@@ -37,6 +37,12 @@ objs*/
 # Debug files
 *.dSYM/
 
+# compilation garbage
+*.debug
+*.full
+.depend
+bin/
+
 # ide files
 /nbproject/
 .project

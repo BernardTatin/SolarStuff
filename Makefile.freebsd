@@ -29,25 +29,27 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-CC = gcc46
+CC = gcc
 LD = $(CC)
 LIBS = -lX11 -lpthread -lrt
 RM = rm -fv
 
 optim = -O3
 
-INCDIR = -I${PWD}/include -I${PWD}/freebsd
+HERE=.
+INCDIR = -I${HERE}/include -I${HERE}/freebsd
 CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
 #LDFLAGS +=
 LDADD += $(LIBS)
 
-SRCDIR = ${PWD}/src
-OBJDIR = ${PWD}/objs
-BINDIR = ${PWD}/bin
+SRCDIR = ${HERE}/src
+OBJDIR = ${HERE}/objs
+BINDIR = ${HERE}/bin
 
 
 MAIN = solar-stuff
-PROG = ${BINDIR}/$(MAIN)
+#PROG = ${BINDIR}/$(MAIN)
+PROG = $(MAIN)
 C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c $(SRCDIR)/clist.c
 SRCS = $(C_SRC)
 INSTALL_DIR    = $(BINDIR)
@@ -55,19 +57,4 @@ INSTALL_DIR    = $(BINDIR)
 
 
 .include <bsd.prog.mk>
-
-#all: ${PROG}
-
-#${PROG}: ${OBJS}
-#${CC} -o ${PROG} ${OBJS} ${LIBS}
-
-#clean:
-#@echo "OBJS : ${OBJS}"
-#${RM} ${PROG} ${OBJS}
-
-#${OBJDIR}/%.o:${SRCDIR}/%.c
-#${CC} -c ${CFLAGS} $< -o $@
-
-#.include <bsd.obj.mk>
-#.include <bsd.prog.mk>
 

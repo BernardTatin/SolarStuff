@@ -16,6 +16,9 @@
 
 #elif defined(__FreeBSD__)
 #include <stdlib.h>
+#include <sys/sysctl.h>
+#include <sys/vmmeter.h>
+#include <vm/vm_param.h>
 
 #define LOADAVG_1MIN 0
 #define LOADAVG_5MIN 1

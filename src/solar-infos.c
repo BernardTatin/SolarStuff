@@ -55,11 +55,42 @@ static TSsysconf display_sysconf;
 static TSsysconf buffer_sysconf;
 static pthread_mutex_t mutex_sysconf = PTHREAD_MUTEX_INITIALIZER;
 
+static LONGLONG get_phys_mem(void) {
+    return (LONGLONG)(
+            (LONGLONG)sysconf(_SC_PAGESIZE) *
+            (LONGLONG)sysconf(_SC_PHYS_PAGES) /
+            ONE_MB);
+}
+
+static LONGLONG get_free_mem(void) {
+#if defined(__SunOS)
+    return (LONGLONG)(
+            (LONGLONG)sysconf(_SC_PAGESIZE) *
+            (LONGLONG)sysconf(_SC_AVPHYS_PAGES) /
+            ONE_MB);
+#elif defined(__FreeBSD__)
+    int mib[2];
+    struct vmtotal vmt;
+    size_t len;
+
+    mib[0] = CTL_VM;
+    mib[1] = VM_TOTAL;
+    len = sizeof(vmt);
+    sysctl(mib, 2, &vmt, &len, NULL, 0);
+
+    return (LONGLONG)(
+            (LONGLONG)sysconf(_SC_PAGESIZE) *
+            (LONGLONG)vmt.t_free /
+            ONE_MB);
+#endif
+}
+
 static void fill_staticsoli_sysconf(void) {
     if (!current_sysconf.inited) {
         current_sysconf.num_procs = sysconf(_SC_NPROCESSORS_CONF);
         current_sysconf.page_size = sysconf(_SC_PAGESIZE);
         current_sysconf.num_pages = sysconf(_SC_PHYS_PAGES);
+        current_sysconf.mem = get_phys_mem();
         current_sysconf.inited = true;
 		current_sysconf.uname_ok = uname(&current_sysconf.sname) != -1;
     }
@@ -71,16 +102,8 @@ static void fill_dynasoli_sysconf(void) {
     time(&tp);
     current_sysconf.tm = localtime(&tp);
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
-#if defined(__SunOS)
-    current_sysconf.free_pages = sysconf(_SC_AVPHYS_PAGES);
-#elif defined(__FreeBSD__)
-    current_sysconf.free_pages = sysconf(_SC_PHYS_PAGES);
-#endif
 
-    current_sysconf.mem = (LONGLONG) ((LONGLONG) current_sysconf.num_pages * (LONGLONG) current_sysconf.page_size);
-    current_sysconf.mem /= ONE_MB;
-    current_sysconf.free_mem = (LONGLONG) current_sysconf.free_pages * (LONGLONG) current_sysconf.page_size;
-    current_sysconf.free_mem /= ONE_MB;
+    current_sysconf.free_mem = get_free_mem();
 	if (getloadavg (current_sysconf.load_av, 3) == -1) {
 		for (int i=0; i<3; i++) {
 			current_sysconf.load_av[i] = -1.0;

@@ -1,5 +1,5 @@
 ## ======================================================================
-## Makefile.freebsd
+## Makefile
 ## SolarStuff project
 ## Author: Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
@@ -29,37 +29,58 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-MK_DEBUG_FILES = no
-MK_MAN = no
+os = $(shell uname)
 
-CC = gcc
-# LD = $(CC)
-LIBS = -lX11 -lpthread -lrt
-RM = rm -fv
+ifeq ($(os), SunOS)
+	CC ?= cc
+	LIBS = -L/usr/openwin/lib -lrt
+	arch ?= -m64
+	optim ?= -xO3
+	CFLAGS += -errtags=yes -std=c11
+	ipath = -I./solaris
+else ifeq ($(os), FreeBSD)
+	CC ?= gcc
+	LIBS = -L/usr/local/lib
+	arch ?= -m32
+	optim ?= -O3
+	CFLAGS += -Wall -pedantic -std=c99
+	ipath = -I/usr/local/include -I./freebsd
+endif
 
-optim = -O3
+LD = $(CC)
+LIBS += -lX11 -lpthread
+RM = rm -f
 
-HERE=.
-INCDIR = -I${HERE}/include
-# CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
-CFLAGS += -std=c11 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
-#LDFLAGS +=
-LDADD += $(LIBS)
+ipath += -I./include
+CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
+LDFLAGS += $(arch)
 
-SRCDIR = ${HERE}/src
-OBJDIR = ${HERE}/objs
-BINDIR = ${HERE}/bin
-
+odir = objs$(arch)
+src = src
 
 MAIN = solar-stuff
-PROG = ${BINDIR}/$(MAIN)
-# PROG = $(MAIN)
-C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c $(SRCDIR)/clist.c
-SRCS = $(C_SRC)
-INSTALL_DIR    = $(BINDIR)
+EXE = $(MAIN)$(arch)
+SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c $(src)/clist.c
 
-${BINDIR}:
-	mkdir -p ${BINDIR}
+objs = $(SRC:.c=.o)
+OBJS=$(objs:$(src)/%=$(odir)/%)
 
-.include <bsd.prog.mk>
+all: $(odir) $(EXE)
 
+$(odir):
+	mkdir -p $@
+
+$(EXE): $(OBJS)
+		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
+
+$(odir)/%.o: $(src)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
+
+test: $(EXE)
+		./$(EXE)
+
+clean:
+		$(RM) $(EXE) $(OBJS)
+		$(RM) a.out core
+
+.PHONY: all test clean

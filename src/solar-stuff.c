@@ -57,11 +57,13 @@
 #include "solar-infos.h"
 
 #if defined(__APPLE_CC__)
-static const char* s1 = "X11 test app under Mac OS X Lion";
+static const char* s1 = "Solar Stuff under Mac OS X Lion";
+#elif defined(__FreeBSD__)
+static const char* s1 = "Solar Stuff under FreeBSD";
 #else
-static const char* s1 = "X11 test app under Solaris";
+static const char* s1 = "Solar Stuff under Solaris";
 #endif
-static const char* s2 = "(C)2012 Geeks3D.com";
+static const char* s2 = "(C)2012 Geeks3D - BernardT 2016-2024";
 
 static int select_fd;
 
@@ -74,7 +76,7 @@ static bool onKeyPress(XEvent *e) {
 
 static void onExposeChild(void) {
     XhDrawString(xconf_main.childStatus, 10, 12, "child window");
-    fprintf(stdout, "onExposeChild");
+    fprintf(stdout, "onExposeChild\n");
 }
 
 static void onExposeMainWindow(Display *display, const int screen, const Window win) {
@@ -141,7 +143,7 @@ static void send_ExposeEvent(void) {
 }
 
 int main(int argc, char** argv) {
-    char buffer[128];
+    char buffer[512];
     TSsysconf *sysconf;
 
     xconf_open(100, 100, 660, 200);
@@ -150,12 +152,12 @@ int main(int argc, char** argv) {
 
 #if defined(__APPLE_CC__)
     y_offset += 15;
-    XStoreName(display, win, "Geeks3D.com - X11 window under Mac OS X (Lion)");
+    XStoreName(display, win, "Solar Stuff under Mac OS X (Lion)");
 #else
     if (sysconf->uname_ok) {
-        sprintf(buffer, "Geeks3D.com - X11 window under Unix (%s)", sysconf->sname.sysname);
+        sprintf(buffer, "Solar Stuff under Unix (%s)", sysconf->sname.sysname);
     } else {
-        strcpy(buffer, "Geeks3D.com - X11 window under Unix");
+        strcpy(buffer, "Solar Stuff under Unix");
     }
     XStoreName(xconf_main.display, xconf_main.win, buffer);
 #endif

@@ -44,6 +44,7 @@ static inline TScl_element *cl_elt_new(void *value) {
 
 	elt->value = value;
 	elt->next = NULL;
+    return elt;
 }
 
 typedef struct _TScl_list {

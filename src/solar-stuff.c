@@ -65,6 +65,9 @@ static const char* s1 = "Solar Stuff under Solaris";
 #endif
 static const char* s2 = "(C)2012 Geeks3D - BernardT 2016-2024";
 
+static const int W_WIDTH  = 660;
+static const int W_HEIGHT = 220;
+
 static int select_fd;
 
 static bool onKeyPress(XEvent *e) {
@@ -137,8 +140,8 @@ static void send_ExposeEvent(void) {
     ee.type = Expose;
     ee.display = xconf_main.display;
     ee.window = xconf_main.win;
-    ee.width = 660;
-    ee.height = 220;
+    ee.width = W_WIDTH;
+    ee.height = W_HEIGHT;
     XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *) & ee);
 }
 
@@ -146,7 +149,7 @@ int main(int argc, char** argv) {
     char buffer[512];
     TSsysconf *sysconf;
 
-    xconf_open(100, 100, 660, 200);
+    xconf_open(100, 100, W_WIDTH, W_HEIGHT);
     soli_start();
     sysconf = soli_sysconf();
 

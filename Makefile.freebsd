@@ -30,19 +30,19 @@
 ##    SOFTWARE.
 
 MK_DEBUG_FILES = no
-MK_MAN = no
+NO_MAN=
 
-CC = gcc
+CC = clang 		# gcc
 # LD = $(CC)
-LIBS = -lX11 -lpthread -lrt
+LIBS = -L/usr/local/lib -lX11 -lpthread -lrt
 RM = rm -fv
 
-optim = -O3
+optim = # -O3
 
 HERE=.
 INCDIR = -I${HERE}/include
 # CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
-CFLAGS += -std=c11 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
+CFLAGS += -std=c11 $(optim) $(INCDIR) -I/usr/local/include -Wall -pedantic -D_REENTRANT
 #LDFLAGS +=
 LDADD += $(LIBS)
 

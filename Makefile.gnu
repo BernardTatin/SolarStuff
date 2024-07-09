@@ -29,27 +29,26 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-os = $(shell uname)
+os := $(shell uname)
 
+arch ?= -m64
 ifeq ($(os), SunOS)
 	CC ?= cc
 	LIBS = -L/usr/openwin/lib -lrt
-	arch ?= -m64
 	optim ?= -xO3
 	CFLAGS += -errtags=yes -std=c11
-	ipath = -I./solaris
+	ipath = 
 else ifeq ($(os), FreeBSD)
-	CC ?= gcc
+	CC ?= clang
 	LIBS = -L/usr/local/lib
-	arch ?= -m32
-	optim ?= -O3
-	CFLAGS += -Wall -pedantic -std=c99
-	ipath = -I/usr/local/include -I./freebsd
+	optim ?= -O2
+	CFLAGS += -Wall -pedantic -std=c11
+	ipath = -I/usr/local/include
 endif
 
 LD = $(CC)
 LIBS += -lX11 -lpthread
-RM = rm -f
+RM = rm -v -f
 
 ipath += -I./include
 CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
@@ -59,7 +58,7 @@ odir = objs$(arch)
 src = src
 
 MAIN = solar-stuff
-EXE = $(MAIN)$(arch)
+EXE = bin/$(MAIN)$(arch)
 SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c $(src)/clist.c
 
 objs = $(SRC:.c=.o)
@@ -84,3 +83,4 @@ clean:
 		$(RM) a.out core
 
 .PHONY: all test clean
+

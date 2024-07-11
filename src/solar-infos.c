@@ -69,7 +69,10 @@ static LONGLONG get_free_mem(void) {
             (LONGLONG)sysconf(_SC_AVPHYS_PAGES) /
             ONE_MB);
 #elif defined(__linux__)
-    return (LONGLONG)0;
+    return (LONGLONG)(
+            (LONGLONG)sysconf(_SC_PAGESIZE) *
+            (LONGLONG)sysconf(_SC_AVPHYS_PAGES) /
+            ONE_MB);
 #elif defined(__FreeBSD__)
     int mib[2];
     struct vmtotal vmt;

@@ -14,6 +14,14 @@
 
 #define LONGLONG	longlong_t
 
+#elif defined(__linux__)
+#define LOADAVG_1MIN 0
+#define LOADAVG_5MIN 1
+#define LOADAVG_15MIN 2
+
+#define	LOADAVG_NSTATS	3
+
+#define LONGLONG	long long
 #elif defined(__FreeBSD__)
 #include <stdlib.h>
 #include <sys/sysctl.h>

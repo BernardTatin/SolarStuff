@@ -68,6 +68,8 @@ static LONGLONG get_free_mem(void) {
             (LONGLONG)sysconf(_SC_PAGESIZE) *
             (LONGLONG)sysconf(_SC_AVPHYS_PAGES) /
             ONE_MB);
+#elif defined(__linux__)
+    return (LONGLONG)0;
 #elif defined(__FreeBSD__)
     int mib[2];
     struct vmtotal vmt;
@@ -104,11 +106,13 @@ static void fill_dynasoli_sysconf(void) {
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
 
     current_sysconf.free_mem = get_free_mem();
+#if !defined(__linux__)
 	if (getloadavg (current_sysconf.load_av, 3) == -1) {
 		for (int i=0; i<3; i++) {
 			current_sysconf.load_av[i] = -1.0;
 		}
 	}
+#endif
 	pthread_mutex_lock(&mutex_sysconf);
 	memmove (&display_sysconf, &current_sysconf, sizeof(TSsysconf));
 	pthread_mutex_unlock(&mutex_sysconf);

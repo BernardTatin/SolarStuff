@@ -38,6 +38,12 @@ ifeq ($(os), SunOS)
 	optim ?= -xO3
 	CFLAGS += -errtags=yes -std=c11
 	ipath = 
+else ifeq ($(os), Linux)
+	CC ?= clang
+	LIBS = -L/usr/lib
+	optim ?= -O2
+	CFLAGS += -Wall -pedantic -std=c11
+	ipath = -I/usr/include
 else ifeq ($(os), FreeBSD)
 	CC ?= clang
 	LIBS = -L/usr/local/lib
@@ -64,7 +70,10 @@ SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c $(sr
 objs = $(SRC:.c=.o)
 OBJS=$(objs:$(src)/%=$(odir)/%)
 
-all: $(odir) $(EXE)
+all: $(odir) bin $(EXE)
+
+bin:
+	mkdir -p ./bin
 
 $(odir):
 	mkdir -p $@

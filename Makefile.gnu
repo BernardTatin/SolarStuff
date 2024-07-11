@@ -39,8 +39,8 @@ ifeq ($(os), SunOS)
 	CFLAGS += -errtags=yes -std=c11
 	ipath = 
 else ifeq ($(os), Linux)
-	CC ?= clang
-	LIBS = -L/usr/lib
+	CC = gcc
+	LIBS = -L/usr/lib -lX11
 	optim ?= -O2
 	CFLAGS += -Wall -pedantic -std=c11
 	ipath = -I/usr/include

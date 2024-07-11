@@ -44,7 +44,6 @@
 #include <sys/utsname.h>
 
 #include "Xconf.h"
-#include "Xhelper.h"
 
 
 TSXconfig xconf_main;
@@ -84,5 +83,18 @@ bool xconf_open(const int x, const int y, const int width, const int height) {
             WhitePixel(xconf_main.display, xconf_main.screen));
     XSelectInput(xconf_main.display, xconf_main.childStatus, ExposureMask);
     XMapWindow(xconf_main.display, xconf_main.childStatus);
+/*
+XFontStruct* font;
+char* name = "-*-dejavu sans-bold-r-*-*-*-220-100-100-*-*-iso8859-1";
+font = XLoadQueryFont(dpy, name);
+XSetFont(dpy, gc, font->fid);
+XTextExtents(font, msg, len, &dir, &as
+*/
+// -*-avant garde gothic-demi-r-*-*-*-*-*-*-*-*-*-*
+// -*-urw gothic l-demi-r-*-*-*-*-*-*-*-*-iso8859-1%
+// -*-itc avant garde gothic-demi-r-*-*-*-*-*-*-*-*-*-*
+
+    xconf_main.normalFont = XLoadQueryFont(xconf_main.display, "-*-itc avant garde gothic-book-r-*-*-*-*-*-*-*-*-*-*");
+    xconf_main.titleFont = XLoadQueryFont(xconf_main.display, "-*-itc avant garde gothic-demi-r-*-*-*-*-*-*-*-*-*-*");
     return true;
 }

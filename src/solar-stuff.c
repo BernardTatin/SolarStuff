@@ -58,14 +58,16 @@
 
 #if defined(__APPLE_CC__)
 static const char* s1 = "Solar Stuff under Mac OS X Lion";
+#elif defined(__FnuxreeBSD__)
+static const char* s1 = "Solar Stuff under Linux";
 #elif defined(__FreeBSD__)
 static const char* s1 = "Solar Stuff under FreeBSD";
 #else
 static const char* s1 = "Solar Stuff under Solaris";
 #endif
-static const char* s2 = "(C)2012 Geeks3D - BernardT 2016-2024";
+static const char* s2 = "(C)2012-2024 Geeks3D - BernardT";
 
-static const int W_WIDTH  = 660;
+static const int W_WIDTH  = 760;
 static const int W_HEIGHT = 220;
 
 static int select_fd;
@@ -77,15 +79,17 @@ static bool onKeyPress(XEvent *e) {
     return (keysym == XK_Escape);
 }
 
-static void onExposeChild(void) {
-    XhDrawString(xconf_main.childStatus, 10, 12, "child window");
-    fprintf(stdout, "onExposeChild\n");
+static void onExposeChild(const int width,
+                          const int height) {
+    XSetFont(xconf_main.display, xconf_main.gc, (xconf_main.titleFont)->fid);
+    XhDrawString(xconf_main.childStatus, 10, 12, "Child: %d x %d", width, height);
 }
 
-static void onExposeMainWindow(Display *display, const int screen, const Window win) {
-    xconf_init_gc();
+static void onExposeMainWindow(const int width,
+                               const int height) {
     int x_offset = 10;
     int y_offset = 20;
+    int dy = 32;
     TSsysconf *sysconf = soli_sysconf();
 
     XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s1);
@@ -95,30 +99,30 @@ static void onExposeMainWindow(Display *display, const int screen, const Window 
 
     if (sysconf->uname_ok) {
         XhDrawString(xconf_main.win, x_offset, y_offset, "System information -->");
-        y_offset += 15;
+        y_offset += dy;
 
         XhDrawString(xconf_main.win, x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
-        y_offset += 15;
+        y_offset += dy;
 
         XhDrawString(xconf_main.win, x_offset, y_offset, "- Release: %s", sysconf->sname.release);
-        y_offset += 15;
+        y_offset += dy;
 
         XhDrawString(xconf_main.win, x_offset, y_offset, "- Version: %s", sysconf->sname.version);
-        y_offset += 15;
+        y_offset += dy;
 
         XhDrawString(xconf_main.win, x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
-        y_offset += 20;
+        y_offset += dy;
     }
 
-    x_offset = 250;
-    y_offset = 20;
+    x_offset = W_WIDTH/2;
+    y_offset = dy;
     XhDrawString(xconf_main.win, x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
             (sysconf->num_procs > 1) ? "s" : "", sysconf->procs_online);
-    y_offset += 20;
+    y_offset += dy;
     XhDrawString(xconf_main.win, x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
-    y_offset += 20;
+    y_offset += dy;
     XhDrawString(xconf_main.win, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
-    y_offset += 20;
+    y_offset += dy;
     XhDrawString(xconf_main.win, x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
@@ -187,10 +191,16 @@ int main(int argc, char** argv) {
                         break;
                     case Expose:
                         if (e.xexpose.count == 0) {
+                            XExposeEvent *xe = (XExposeEvent *)&e;
+                            xconf_init_gc();
+                            XSetFont(xconf_main.display, xconf_main.gc, (xconf_main.normalFont)->fid);
+
                             if (e.xexpose.window == xconf_main.win) {
-                                onExposeMainWindow(xconf_main.display, xconf_main.screen, xconf_main.win);
+                                onExposeMainWindow(xe->width,
+                                                   xe->height);
+                                // fprintf(stdout, "onExpose %d x %d\n", xe->width, xe->height);
                             } else {
-                                onExposeChild();
+                                onExposeChild(xe->width, xe->height);
                             }
                         }
                         break;
@@ -199,6 +209,9 @@ int main(int argc, char** argv) {
                         break;
                     case ClientMessage:
                         end = ((unsigned int) (e.xclient.data.l[0]) == WM_DELETE_WINDOW);
+                        break;
+                    default:
+                        // printf("Event 0x%04x - %6d\n", e.type, e.type);
                         break;
                 }
             }

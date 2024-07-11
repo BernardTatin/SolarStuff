@@ -44,6 +44,9 @@ typedef struct {
 
 	Window childStatus;
 	// bool chid_on;
+
+    XFontStruct *normalFont;
+    XFontStruct *titleFont;
 } TSXconfig;
 
 extern TSXconfig xconf_main;
@@ -64,5 +67,6 @@ static inline void xconf_close(void) {
     XDestroyWindow(xconf_main.display, xconf_main.win);
     XCloseDisplay(xconf_main.display);
 }
+
 #endif	/* PRIVATE_XHELPER_H */
 

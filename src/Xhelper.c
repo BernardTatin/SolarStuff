@@ -42,7 +42,7 @@
 
 #define MAX_STR_LEN	512
 
-int XhDrawString(const Window win, int x, int y, char *format, ...) {
+int XhDrawString(const Window win, const int x, const int y, char *format, ...) {
     va_list aptr;
     int ret;
     char buffer[MAX_STR_LEN + 1];

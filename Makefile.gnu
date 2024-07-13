@@ -58,7 +58,9 @@ RM = rm -v -f
 
 ipath += -I./include -I./libs -I./xlibs
 CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
+CFLAGS += $(shell pkg-config --cflags xrender freetype2)
 LDFLAGS += $(arch)
+LDFLAGS += -lfreetype -lXrender -lXft -lm
 
 odir  = objs$(arch)
 src   = src

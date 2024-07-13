@@ -42,10 +42,16 @@ typedef struct {
 	XGCValues   gr_values; 
 	GC          gr_context;
 
-	Window      childStatus;
+    XftFont  *fontNormal;
+    XftFont  *fontTitle;
+    Visual   *visual;
+    XftDraw  *draw;
+    XftColor  color;
+    XftColor  background;
+    XftColor  green;
+    Colormap  cmap;
+    // int       scr;
 
-    XFontStruct *normalFont;
-    XFontStruct *titleFont;
 } TSXconfig;
 
 extern TSXconfig xconf_main;

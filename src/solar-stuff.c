@@ -39,6 +39,7 @@
 #include <X11/Xos.h>
 #include <X11/Xresource.h>
 #include <X11/keysym.h>
+#include <X11/Xft/Xft.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,11 +80,6 @@ static bool onKeyPress(XEvent *e) {
     return (keysym == XK_Escape);
 }
 
-static void onExposeChild(const int width,
-                          const int height) {
-    XSetFont(xconf_main.display, xconf_main.gc, (xconf_main.titleFont)->fid);
-    XhDrawString(xconf_main.childStatus, 10, 12, "Child: %d x %d", width, height);
-}
 
 static void onExposeMainWindow(const int width,
                                const int height) {
@@ -92,10 +88,15 @@ static void onExposeMainWindow(const int width,
     int dy = 32;
     TSsysconf *sysconf = soli_sysconf();
 
+    get_text_extent(xconf_main.fontNormal, "Wp|", NULL, &dy);
+    dy *= 3;
+    dy /= 2;
+    
+    XftDrawRect(xconf_main.draw, &xconf_main.background, 0, 0, width, height);
     XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s1);
-    y_offset += 20;
+    y_offset += dy;
     XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s2);
-    y_offset += 20;
+    y_offset += dy;
 
     if (sysconf->uname_ok) {
         XhDrawString(xconf_main.win, x_offset, y_offset, "System information -->");
@@ -107,9 +108,6 @@ static void onExposeMainWindow(const int width,
         XhDrawString(xconf_main.win, x_offset, y_offset, "- Release: %s", sysconf->sname.release);
         y_offset += dy;
 
-        XhDrawString(xconf_main.win, x_offset, y_offset, "- Version: %s", sysconf->sname.version);
-        y_offset += dy;
-
         XhDrawString(xconf_main.win, x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
         y_offset += dy;
     }
@@ -119,10 +117,32 @@ static void onExposeMainWindow(const int width,
     XhDrawString(xconf_main.win, x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
             (sysconf->num_procs > 1) ? "s" : "", sysconf->procs_online);
     y_offset += dy;
+
     XhDrawString(xconf_main.win, x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
-    y_offset += dy;
+
+    {
+        int rwidth = width - x_offset - dy;
+        int rpct = (rwidth * sysconf->free_mem) / sysconf->mem;
+        int pct  = (100 * sysconf->free_mem) / sysconf->mem;
+        int w, h;
+        int x, y;
+        static char buffer[128];
+
+        sprintf(buffer, "%d %% free", pct);
+        get_text_extent(xconf_main.fontNormal, buffer, &w, &h);
+        y_offset += dy / 2;
+        XftDrawRect (xconf_main.draw, &xconf_main.color,        x_offset,     y_offset,     rwidth + 2, dy + 2);
+        XftDrawRect (xconf_main.draw, &xconf_main.background,   x_offset + 1, y_offset + 1, rwidth,     dy);
+        XftDrawRect (xconf_main.draw, &xconf_main.green,        x_offset + 1, y_offset + 1, rpct,       dy);
+        x = x_offset + (rwidth - w) /2;
+        y = y_offset + dy/2 + 4;
+        XhDrawString(xconf_main.win, x, y, "%s", buffer);
+        fprintf(stdout, "%s\n", buffer);
+        y_offset += 2 * dy;
+    }
     XhDrawString(xconf_main.win, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
     y_offset += dy;
+
     XhDrawString(xconf_main.win, x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
@@ -195,14 +215,10 @@ int main(int argc, char** argv) {
                         if (e.xexpose.count == 0) {
                             XExposeEvent *xe = (XExposeEvent *)&e;
                             xconf_init_gc();
-                            XSetFont(xconf_main.display, xconf_main.gc, (xconf_main.normalFont)->fid);
 
                             if (e.xexpose.window == xconf_main.win) {
                                 onExposeMainWindow(xe->width,
                                                    xe->height);
-                                // fprintf(stdout, "onExpose %d x %d\n", xe->width, xe->height);
-                            } else {
-                                onExposeChild(xe->width, xe->height);
                             }
                         }
                         break;

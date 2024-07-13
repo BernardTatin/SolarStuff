@@ -34,13 +34,26 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <X11/Xft/Xft.h>
 
 #include "Xconf.h"
 #include "Xhelper.h"
 
 // int XDrawString(Display *display, Drawable d, GC gc, int x, int y, char *string, int length);
 
-#define MAX_STR_LEN	512
+#define MAX_STR_LEN	511
+
+void get_text_extent(XftFont *font, const char *text, int *w, int *h) {
+    XGlyphInfo extents;
+    int len = strlen(text);
+    XftTextExtentsUtf8(xconf_main.display, font, (const FcChar8 *)text, len, &extents);
+    if (w != NULL) {
+        *w = extents.width;
+    }
+    if (h != NULL) {
+        *h = extents.height;
+    }
+}
 
 int XhDrawString(const Window win, const int x, const int y, char *format, ...) {
     va_list aptr;
@@ -52,8 +65,9 @@ int XhDrawString(const Window win, const int x, const int y, char *format, ...) 
     va_end(aptr);
     buffer[MAX_STR_LEN] = 0;
     if (ret > 0) {
-        return XDrawImageString(xconf_main.display, win, xconf_main.gc, x, y, buffer, ret);
-    } else {
-        return 0;
+        // return XDrawImageString(xconf_main.display, win, xconf_main.gc, x, y, buffer, ret);
+        XftDrawStringUtf8(xconf_main.draw, &xconf_main.color, xconf_main.fontNormal,
+            x, y, (const FcChar8 *)buffer, ret);
     }
+    return ret;
 }

@@ -137,7 +137,7 @@ static void onExposeMainWindow(const int width,
         x = x_offset + (rwidth - w) /2;
         y = y_offset + dy/2 + 4;
         XhDrawString(xconf_main.win, x, y, "%s", buffer);
-        fprintf(stdout, "%s\n", buffer);
+        
         y_offset += 2 * dy;
     }
     XhDrawString(xconf_main.win, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);

@@ -30,36 +30,59 @@
 ##    SOFTWARE.
 
 MK_DEBUG_FILES = no
-NO_MAN=
+MK_MAN=no
 
 CC = clang 		# gcc
 # LD = $(CC)
-LIBS = -L/usr/local/lib -lX11 -lpthread -lrt
+XXLIBS = -L/usr/local/lib -lX11 -lpthread -lrt
 RM = rm -fv
 
 optim = # -O3
 
-HERE=.
-INCDIR = -I${HERE}/include
-# CFLAGS += -std=c99 $(optim) $(INCDIR) -Wall -pedantic -D_REENTRANT
-CFLAGS += -std=c11 $(optim) $(INCDIR) -I/usr/local/include -Wall -pedantic -D_REENTRANT
-#LDFLAGS +=
-LDADD += $(LIBS)
-
 SRCDIR = ${HERE}/src
+libs  = libs
+xlibs = xlibs
+
+HERE=.
+INCDIR = -I${HERE}/include -I$(libs) -I$(xlibs)
+
+CFLAGS += -std=c11 $(optim) $(INCDIR) -I/usr/local/include -Wall -pedantic -D_REENTRANT
+
+LDADD += $(XXLIBS)
+
+CFLAGS += $(shell pkg-config --cflags xrender freetype2)
+CFLAGS += -I/usr/local/include/freetype2 
+LDADD  += -lfreetype -lXrender -lXft -lm
+
+
+
 OBJDIR = ${HERE}/objs
 BINDIR = ${HERE}/bin
 
 
 MAIN = solar-stuff
-PROG = ${BINDIR}/$(MAIN)
-# PROG = $(MAIN)
-C_SRC = $(SRCDIR)/$(MAIN).c $(SRCDIR)/Xhelper.c $(SRCDIR)/Xconf.c $(SRCDIR)/solar-infos.c $(SRCDIR)/clist.c
-SRCS = $(C_SRC)
-INSTALL_DIR    = $(BINDIR)
+PROG = $(MAIN)
 
-${BINDIR}:
-	mkdir -p ${BINDIR}
+C_SRC = $(SRCDIR)/$(MAIN).c  $(xlibs)/Xhelper.c $(xlibs)/Xconf.c $(libs)/solar-infos.c $(libs)/clist.c
+SRCS = $(C_SRC)
+
+BINGRP=	bernard
+BINOWN= bernard
+
+INSTALL_DIR    = ${BINDIR}
+
+bin:	$(BINDIR)
+
+$(BINDIR):
+	mkdir -p $(BINDIR)
+
+help:
+	@echo "CFLAGS $(CFLAGS)"
+
+
+install: bin all
+	cp $(PROG) $(BINDIR)/$(PROG)
+
 
 .include <bsd.prog.mk>
 

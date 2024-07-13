@@ -46,8 +46,8 @@
 
 #include "Xconf.h"
 
-static char *sz_fontNormal = "DejaVu Sans:size=12:antialias=true";
-static char *sz_fontTitle = "DejaVu Sans Bold:size=16:antialias=true";
+static const char *sz_fontNormal = "DejaVu Sans:size=12:antialias=true";
+static const char *sz_fontTitle = "DejaVu Sans Bold:size=16:antialias=true";
 
 TSXconfig xconf_main;
 static XSetWindowAttributes attributes;

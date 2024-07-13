@@ -7,12 +7,12 @@
 ##
 ## ======================================================================
 
-##    The MIT License (MIT)
+##    The MIT License {MIT}
 ##
-##    Copyright (c) 2016 Bernard TATIN <bernard dot tatin at outlook dot org>
+##    Copyright {c} 2016 Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
 ##    Permission is hereby granted, free of charge, to any person obtaining a copy
-##    of this software and associated documentation files (the "Software"), to deal
+##    of this software and associated documentation files {the "Software"}, to deal
 ##    in the Software without restriction, including without limitation the rights
 ##    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 ##    copies of the Software, and to permit persons to whom the Software is
@@ -32,26 +32,32 @@
 MK_DEBUG_FILES = no
 MK_MAN=no
 
-CC = clang 		# gcc
-# LD = $(CC)
-XXLIBS = -L/usr/local/lib -lX11 -lpthread -lrt
+CC = clang
+
 RM = rm -fv
 
-optim = # -O3
+optim =
 
 SRCDIR = ${HERE}/src
-libs  = libs
-xlibs = xlibs
+libs  = ${HERE}/libs
+xlibs = ${HERE}/xlibs
 
 HERE=.
-INCDIR = -I${HERE}/include -I$(libs) -I$(xlibs)
+INCDIR = -I${HERE}/include -I${libs} -I${xlibs}
 
-CFLAGS += -std=c11 $(optim) $(INCDIR) -I/usr/local/include -Wall -pedantic -D_REENTRANT
+MAIN = solar-stuff
+PROG = ${MAIN}
 
-LDADD += $(XXLIBS)
+SRCS = ${SRCDIR}/${MAIN}.c  ${xlibs}/Xhelper.c ${xlibs}/Xconf.c ${libs}/solar-infos.c ${libs}/clist.c
 
+WARNS  ?= 6			# level of warnings/errors 
+CSTD    = c11
+CFLAGS += -D_REENTRANT
+CFLAGS += ${INCDIR} -I/usr/local/include -I/usr/local/include/freetype2
 CFLAGS += $(shell pkg-config --cflags xrender freetype2)
-CFLAGS += -I/usr/local/include/freetype2 
+CFLAGS += ${optim}
+
+LDADD  += -L/usr/local/lib -lX11 -lpthread -lrt
 LDADD  += -lfreetype -lXrender -lXft -lm
 
 
@@ -60,29 +66,21 @@ OBJDIR = ${HERE}/objs
 BINDIR = ${HERE}/bin
 
 
-MAIN = solar-stuff
-PROG = $(MAIN)
-
-C_SRC = $(SRCDIR)/$(MAIN).c  $(xlibs)/Xhelper.c $(xlibs)/Xconf.c $(libs)/solar-infos.c $(libs)/clist.c
-SRCS = $(C_SRC)
 
 BINGRP=	bernard
 BINOWN= bernard
 
-INSTALL_DIR    = ${BINDIR}
-
-bin:	$(BINDIR)
-
-$(BINDIR):
-	mkdir -p $(BINDIR)
+${BINDIR}:
+	mkdir -p ${BINDIR}
 
 help:
-	@echo "CFLAGS $(CFLAGS)"
+	@echo "CFLAGS ${CFLAGS}"
 
+install: ${BINDIR} ${PROG}
+	cp ${PROG} ${BINDIR}/${PROG}
 
-install: bin all
-	cp $(PROG) $(BINDIR)/$(PROG)
-
+run: ${PROG}
+	./${PROG}
 
 .include <bsd.prog.mk>
 

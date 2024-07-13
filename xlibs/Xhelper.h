@@ -33,7 +33,7 @@
 #ifndef XHELPER_H
 #define	XHELPER_H
 
-int XhDrawString(const Window win, const int x, const int y, char *format, ...);
+int XhDrawString(const int x, const int y, const char *format, ...);
 void get_text_extent(XftFont *font, const char *text, int *w, int *y);
 
 // static inline void XhFillRectangle(const int x, const int y, const int width, const int height) {

@@ -93,32 +93,32 @@ static void onExposeMainWindow(const int width,
     dy /= 2;
     
     XftDrawRect(xconf_main.draw, &xconf_main.background, 0, 0, width, height);
-    XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s1);
+    XhDrawString(x_offset, y_offset, s1);
     y_offset += dy;
-    XhDrawString(xconf_main.win, x_offset, y_offset, (char *) s2);
+    XhDrawString(x_offset, y_offset, s2);
     y_offset += dy;
 
     if (sysconf->uname_ok) {
-        XhDrawString(xconf_main.win, x_offset, y_offset, "System information -->");
+        XhDrawString(x_offset, y_offset, "System information -->");
         y_offset += dy;
 
-        XhDrawString(xconf_main.win, x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
+        XhDrawString(x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
         y_offset += dy;
 
-        XhDrawString(xconf_main.win, x_offset, y_offset, "- Release: %s", sysconf->sname.release);
+        XhDrawString(x_offset, y_offset, "- Release: %s", sysconf->sname.release);
         y_offset += dy;
 
-        XhDrawString(xconf_main.win, x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
+        XhDrawString(x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
         y_offset += dy;
     }
 
     x_offset = W_WIDTH/2;
     y_offset = dy;
-    XhDrawString(xconf_main.win, x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
+    XhDrawString(x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
             (sysconf->num_procs > 1) ? "s" : "", sysconf->procs_online);
     y_offset += dy;
 
-    XhDrawString(xconf_main.win, x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
+    XhDrawString(x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
 
     {
         int rwidth = width - x_offset - dy;
@@ -136,14 +136,14 @@ static void onExposeMainWindow(const int width,
         XftDrawRect (xconf_main.draw, &xconf_main.green,        x_offset + 1, y_offset + 1, rpct,       dy);
         x = x_offset + (rwidth - w) /2;
         y = y_offset + dy/2 + 4;
-        XhDrawString(xconf_main.win, x, y, "%s", buffer);
-        
+        XhDrawString(x, y, "%s", buffer);
+
         y_offset += 2 * dy;
     }
-    XhDrawString(xconf_main.win, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
+    XhDrawString(x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
     y_offset += dy;
 
-    XhDrawString(xconf_main.win, x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
+    XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
 static int do_select(void) {
@@ -181,7 +181,7 @@ static void get_win_title(TSsysconf *sysconf, char *buffer) {
 #endif
 }
 
-int main(int argc, char** argv) {
+int main(void) {
     char buffer[512];
     TSsysconf *sysconf;
 

@@ -130,6 +130,10 @@ TSsysconf *soli_sysconf(void) {
 
 static void *soli_loop(void *arg) {
 	struct timespec ts;
+
+    if (arg != NULL) {
+        fprintf(stderr, "WARNING: soli_loop arg not NULL");
+    }
 	while (!soli_bstop) {
 		fill_dynasoli_sysconf();
 		ts.tv_sec = 0;

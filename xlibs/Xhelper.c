@@ -55,7 +55,7 @@ void get_text_extent(XftFont *font, const char *text, int *w, int *h) {
     }
 }
 
-int XhDrawString(const Window win, const int x, const int y, char *format, ...) {
+int XhDrawString(const int x, const int y, const char *format, ...) {
     va_list aptr;
     int ret;
     char buffer[MAX_STR_LEN + 1];
@@ -65,7 +65,6 @@ int XhDrawString(const Window win, const int x, const int y, char *format, ...) 
     va_end(aptr);
     buffer[MAX_STR_LEN] = 0;
     if (ret > 0) {
-        // return XDrawImageString(xconf_main.display, win, xconf_main.gc, x, y, buffer, ret);
         XftDrawStringUtf8(xconf_main.draw, &xconf_main.color, xconf_main.fontNormal,
             x, y, (const FcChar8 *)buffer, ret);
     }

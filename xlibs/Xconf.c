@@ -49,7 +49,13 @@
 TSXconfig xconf_main;
 static XSetWindowAttributes attributes;
 
-bool xconf_open(const int x, const int y, const int width, const int height) {
+static void set_wintitle(const char *win_title) {
+    XStoreName(xconf_main.display, xconf_main.win, win_title);
+}
+
+bool xconf_open(const int x, const int y, 
+                const int width, const int height, 
+                const char* win_title) {
     Visual *visual;
     int depth;
 
@@ -96,5 +102,8 @@ XTextExtents(font, msg, len, &dir, &as
 
     xconf_main.normalFont = XLoadQueryFont(xconf_main.display, "-*-itc avant garde gothic-book-r-*-*-*-*-*-*-*-*-*-*");
     xconf_main.titleFont = XLoadQueryFont(xconf_main.display, "-*-itc avant garde gothic-demi-r-*-*-*-*-*-*-*-*-*-*");
+    
+    set_wintitle(win_title);
+
     return true;
 }

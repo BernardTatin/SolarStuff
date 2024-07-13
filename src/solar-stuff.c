@@ -52,9 +52,9 @@
 
 #include "compat.h"
 
+#include "solar-infos.h"
 #include "Xconf.h"
 #include "Xhelper.h"
-#include "solar-infos.h"
 
 #if defined(__APPLE_CC__)
 static const char* s1 = "Solar Stuff under Mac OS X Lion";
@@ -149,32 +149,34 @@ static void send_ExposeEvent(void) {
     XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *) & ee);
 }
 
-int main(int argc, char** argv) {
-    char buffer[512];
-    TSsysconf *sysconf;
-
-    xconf_open(100, 100, W_WIDTH, W_HEIGHT);
-    soli_start();
-    sysconf = soli_sysconf();
-
+static void get_win_title(TSsysconf *sysconf, char *buffer) {
 #if defined(__APPLE_CC__)
-    y_offset += 15;
-    XStoreName(display, win, "Solar Stuff under Mac OS X (Lion)");
+    strcpy(buffer, "Solar Stuff under Mac OS X (Lion)");
 #else
     if (sysconf->uname_ok) {
         sprintf(buffer, "Solar Stuff under Unix (%s)", sysconf->sname.sysname);
     } else {
         strcpy(buffer, "Solar Stuff under Unix");
     }
-    XStoreName(xconf_main.display, xconf_main.win, buffer);
 #endif
-    Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
+}
+
+int main(int argc, char** argv) {
+    char buffer[512];
+    TSsysconf *sysconf;
+
+    soli_start();
+    sysconf = soli_sysconf();
+    get_win_title(sysconf, buffer);
+    xconf_open(100, 100, W_WIDTH, W_HEIGHT, buffer);
+
 
     XEvent e;
     bool end = false;
 
     select_fd = ConnectionNumber(xconf_main.display);
+    Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
 
     XFlush(xconf_main.display);
     while (!end) {

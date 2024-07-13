@@ -34,16 +34,15 @@
 #define	PRIVATE_XHELPER_H
 
 typedef struct {
-	Display* display;
-	int screen;
-	Window root_window;
-	Window win;
-	GC gc;
-	XGCValues gr_values; 
-	GC gr_context;
+	Display*    display;
+	int         screen;
+	Window      root_window;
+	Window      win;
+	GC          gc;
+	XGCValues   gr_values; 
+	GC          gr_context;
 
-	Window childStatus;
-	// bool chid_on;
+	Window      childStatus;
 
     XFontStruct *normalFont;
     XFontStruct *titleFont;
@@ -51,7 +50,9 @@ typedef struct {
 
 extern TSXconfig xconf_main;
 
-bool xconf_open(const int x, const int y, const int width, const int height);
+bool xconf_open(const int x, const int y, 
+                const int width, const int height, 
+                const char* win_title);
 
 static inline GC xconf_init_gc(void) {
 	xconf_main.gc = DefaultGC(xconf_main.display, xconf_main.screen);

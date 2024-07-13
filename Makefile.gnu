@@ -39,7 +39,7 @@ ifeq ($(os), SunOS)
 	CFLAGS += -errtags=yes -std=c11
 	ipath = 
 else ifeq ($(os), Linux)
-	CC = gcc
+	CC = clang
 	LIBS = -L/usr/lib -lX11
 	optim ?= -O2
 	CFLAGS += -Wall -pedantic -std=c11
@@ -56,21 +56,26 @@ LD = $(CC)
 LIBS += -lX11 -lpthread
 RM = rm -v -f
 
-ipath += -I./include
+ipath += -I./include -I./libs -I./xlibs
 CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
 LDFLAGS += $(arch)
 
-odir = objs$(arch)
-src = src
+odir  = objs$(arch)
+src   = src
+libs  = libs
+xlibs = xlibs
 
 MAIN = solar-stuff
 EXE = bin/$(MAIN)$(arch)
-SRC = $(src)/$(MAIN).c $(src)/Xhelper.c $(src)/Xconf.c $(src)/solar-infos.c $(src)/clist.c
+SRC = $(src)/$(MAIN).c $(xlibs)/Xhelper.c $(xlibs)/Xconf.c $(libs)/solar-infos.c $(libs)/clist.c
 
 objs = $(SRC:.c=.o)
 OBJS=$(objs:$(src)/%=$(odir)/%)
 
 all: $(odir) bin $(EXE)
+
+run: all 
+	$(EXE)
 
 bin:
 	mkdir -p ./bin
@@ -82,6 +87,12 @@ $(EXE): $(OBJS)
 		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
 $(odir)/%.o: $(src)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
+
+$(odir)/%.o: $(libs)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
+
+$(odir)/%.o: $(xlibs)/%.c
 		$(CC) -c $< -o $@ $(CFLAGS)
 
 test: $(EXE)

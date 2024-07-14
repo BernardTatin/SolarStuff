@@ -55,7 +55,7 @@
 #include "compat.h"
 
 #include "solar-infos.h"
-#include "Xconf.h"
+#include "Screen.h"
 #include "Xhelper.h"
 
 #if defined(__APPLE_CC__)
@@ -80,44 +80,45 @@ static bool onKeyPress(XEvent *e) {
 }
 
 
-static void onExposeMainWindow(const int width,
-                               const int height) {
+static void onExposeMainWindow(TScreen *screen, 
+                                const int width,
+                                const int height) {
     int x_offset = 10;
     int y_offset = 20;
     int dy = 32;
     TSsysconf *sysconf = soli_sysconf();
 
-    get_text_extent(xconf_main.fontNormal, "Wp|", NULL, &dy);
+    get_text_extent(screen, screen->fontNormal, "Wp|", NULL, &dy);
     dy *= 3;
     dy /= 2;
 
-    XftDrawRect(xconf_main.draw, &xconf_main.background, 0, 0, width, height);
-    XhDrawString(x_offset, y_offset, s1);
+    XftDrawRect (screen->draw, &screen->background, 0, 0, width, height);
+    draw_string(screen, x_offset, y_offset, s1);
     y_offset += dy;
-    XhDrawString(x_offset, y_offset, s2);
+    draw_string(screen, x_offset, y_offset, s2);
     y_offset += dy;
 
     if (sysconf->uname_ok) {
-        XhDrawString(x_offset, y_offset, "System information -->");
+        draw_string(screen, x_offset, y_offset, "System information -->");
         y_offset += dy;
 
-        XhDrawString(x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
+        draw_string(screen, x_offset, y_offset, "- System: %s", sysconf->sname.sysname);
         y_offset += dy;
 
-        XhDrawString(x_offset, y_offset, "- Release: %s", sysconf->sname.release);
+        draw_string(screen, x_offset, y_offset, "- Release: %s", sysconf->sname.release);
         y_offset += dy;
 
-        XhDrawString(x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
+        draw_string(screen, x_offset, y_offset, "- Machine: %s", sysconf->sname.machine);
         y_offset += dy;
     }
 
     x_offset = W_WIDTH/2;
     y_offset = dy;
-    XhDrawString(x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
+    draw_string(screen, x_offset, y_offset, "%ld CPU%s installed, %ld online", sysconf->num_procs,
             (sysconf->num_procs > 1) ? "s" : "", sysconf->procs_online);
     y_offset += dy;
 
-    XhDrawString(x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
+    draw_string(screen, x_offset, y_offset, "%lld MB physical memory, %lld MB free", sysconf->mem, sysconf->free_mem);
 
     {
         int rwidth = width - x_offset - dy;
@@ -128,21 +129,21 @@ static void onExposeMainWindow(const int width,
         static char buffer[128];
 
         sprintf(buffer, "%d %% free", pct);
-        get_text_extent(xconf_main.fontNormal, buffer, &w, &h);
+        get_text_extent(screen, screen->fontNormal, buffer, &w, &h);
         y_offset += dy / 2;
-        XftDrawRect (xconf_main.draw, &xconf_main.color,        x_offset,     y_offset,     rwidth + 2, dy + 2);
-        XftDrawRect (xconf_main.draw, &xconf_main.background,   x_offset + 1, y_offset + 1, rwidth,     dy);
-        XftDrawRect (xconf_main.draw, &xconf_main.green,        x_offset + 1, y_offset + 1, rpct,       dy);
+        XftDrawRect (screen->draw, &screen->color,        x_offset,     y_offset,     rwidth + 2, dy + 2);
+        XftDrawRect (screen->draw, &screen->background,   x_offset + 1, y_offset + 1, rwidth,     dy);
+        XftDrawRect (screen->draw, &screen->green,        x_offset + 1, y_offset + 1, rpct,       dy);
         x = x_offset + (rwidth - w) /2;
         y = y_offset + dy/2 + 4;
-        XhDrawString(x, y, "%s", buffer);
+        draw_string(screen, x, y, "%s", buffer);
 
         y_offset += 2 * dy;
     }
-    XhDrawString(x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
+    draw_string(screen, x_offset, y_offset, "average load : %9.2f | %9.2f | %9.2f", sysconf->load_av [LOADAVG_1MIN], sysconf->load_av [LOADAVG_5MIN], sysconf->load_av [LOADAVG_15MIN]);
     y_offset += dy;
 
-    XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
+    draw_string(screen, x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
 static int do_select(const int select_fd) {
@@ -173,15 +174,15 @@ static int do_select(const int select_fd) {
 }
 
 
-static void send_ExposeEvent(void) {
+static void send_ExposeEvent(TScreen *screen) {
     static XExposeEvent ee;
     memset(&ee, 0, sizeof (XExposeEvent));
     ee.type = Expose;
-    ee.display = xconf_main.display;
-    ee.window = xconf_main.win;
+    ee.display = screen->display;
+    ee.window = screen->win;
     ee.width = W_WIDTH;
     ee.height = W_HEIGHT;
-    XSendEvent(xconf_main.display, xconf_main.win, True, ExposureMask, (XEvent *) & ee);
+    XSendEvent(screen->display, screen->win, True, ExposureMask, (XEvent *) & ee);
 }
 
 static void get_win_title(TSsysconf *sysconf, char *buffer) {
@@ -203,7 +204,7 @@ int main(void) {
     soli_start();
     sysconf = soli_sysconf();
     get_win_title(sysconf, buffer);
-    xconf_open(100, 100, W_WIDTH, W_HEIGHT, buffer);
+    TScreen *screen = screen_open(100, 100, W_WIDTH, W_HEIGHT, buffer);
 
 
     XEvent e;
@@ -212,30 +213,31 @@ int main(void) {
     // https://www.x.org/releases/current/doc/libX11/libX11/libX11.html
     // return a connection number for the specified display. 
     // On a POSIX-conformant system, this is the file descriptor of the connection. 
-    int select_fd = XConnectionNumber(xconf_main.display);
-    Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
+    int select_fd = XConnectionNumber(screen->display);
+    Atom WM_DELETE_WINDOW = XInternAtom(screen->display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(screen->display, screen->win, &WM_DELETE_WINDOW, 1);
 
-    XFlush(xconf_main.display);
+    XFlush(screen->display);
     while (!end) {
         if (do_select(select_fd)) {
-            while (XPending(xconf_main.display)) {
-                XNextEvent(xconf_main.display, &e);
+            while (XPending(screen->display)) {
+                XNextEvent(screen->display, &e);
                 switch (e.type) {
                     case NoExpose:
                         break;
                     case GraphicsExpose:
                         break;
                     case VisibilityNotify:
-                        XClearArea(xconf_main.display, xconf_main.win, 0, 0, 0, 1, True);
+                        XClearArea(screen->display, screen->win, 0, 0, 0, 1, True);
                         break;
                     case Expose:
                         if (e.xexpose.count == 0) {
                             XExposeEvent *xe = (XExposeEvent *)&e;
-                            xconf_init_gc();
+                            screen_init_gc(screen);
 
-                            if (e.xexpose.window == xconf_main.win) {
-                                onExposeMainWindow(xe->width,
+                            if (e.xexpose.window == screen->win) {
+                                onExposeMainWindow(screen, 
+                                                   xe->width,
                                                    xe->height);
                             }
                         }
@@ -252,11 +254,11 @@ int main(void) {
                 }
             }
         } else {
-            send_ExposeEvent();
+            send_ExposeEvent(screen);
         }
-        XFlush(xconf_main.display);
+        XFlush(screen->display);
     }
     soli_stop();
-    xconf_close();
+    screen_close(screen);
     return 0;
 }

@@ -48,7 +48,7 @@ INCDIR = -I${HERE}/include -I${libs} -I${xlibs}
 MAIN = solar-stuff
 PROG = ${MAIN}
 
-SRCS = ${SRCDIR}/${MAIN}.c  ${xlibs}/Xhelper.c ${xlibs}/Xconf.c ${libs}/solar-infos.c ${libs}/clist.c
+SRCS = ${SRCDIR}/${MAIN}.c  ${xlibs}/Xhelper.c ${xlibs}/Screen.c ${libs}/solar-infos.c ${libs}/clist.c
 
 WARNS  ?= 6			# level of warnings/errors 
 CSTD    = c11

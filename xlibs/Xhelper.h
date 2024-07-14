@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   Xhelper.h
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
@@ -33,10 +33,12 @@
 #ifndef XHELPER_H
 #define	XHELPER_H
 
-int XhDrawString(const int x, const int y, const char *format, ...);
-void get_text_extent(XftFont *font, const char *text, int *w, int *y);
+int draw_string(TScreen *screen,
+        const int x, const int y,
+        const char *format, ...);
+void get_text_extent(TScreen *screen,
+        XftFont *font,
+        const char *text,
+        int *w, int *y);
 
-// static inline void XhFillRectangle(const int x, const int y, const int width, const int height) {
-// 	XFillRectangle(xconf_main.display, xconf_main.win, xconf_main.gc, x, y, width, height);
-// }
 #endif	/* XHELPER_H */

@@ -50,30 +50,25 @@ typedef struct {
     XftColor  background;
     XftColor  green;
     Colormap  cmap;
-    // int       scr;
+} TScreen;
 
-} TSXconfig;
-
-extern TSXconfig xconf_main;
-
-bool xconf_open(const int x, const int y, 
-                const int width, const int height, 
+TScreen *screen_open(const int x, const int y,
+                const int width, const int height,
                 const char* win_title);
 
-static inline GC xconf_init_gc(void) {
-	xconf_main.gc = DefaultGC(xconf_main.display, xconf_main.screen);
-	xconf_main.gc = xconf_main.gr_context;
-	return xconf_main.gc;
+static inline GC screen_init_gc(TScreen *screen) {
+	screen->gc = DefaultGC(screen->display, screen->screen);
+	screen->gc = screen->gr_context;
+	return screen->gc;
 }
 
-static inline GC xconf_gc(void) {
-	return xconf_main.gc;
+
+static inline void screen_close(TScreen *screen) {
+    XDestroyWindow(screen->display, screen->win);
+    XCloseDisplay(screen->display);
 }
 
-static inline void xconf_close(void) {
-    XDestroyWindow(xconf_main.display, xconf_main.win);
-    XCloseDisplay(xconf_main.display);
-}
+void die(const char *format, ...);
 
 #endif	/* PRIVATE_XHELPER_H */
 

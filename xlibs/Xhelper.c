@@ -36,17 +36,19 @@
 #include <stdbool.h>
 #include <X11/Xft/Xft.h>
 
-#include "Xconf.h"
+#include "Screen.h"
 #include "Xhelper.h"
 
-// int XDrawString(Display *display, Drawable d, GC gc, int x, int y, char *string, int length);
 
 #define MAX_STR_LEN	511
 
-void get_text_extent(XftFont *font, const char *text, int *w, int *h) {
+void get_text_extent(TScreen *screen,
+        XftFont *font,
+        const char *text,
+        int *w, int *h) {
     XGlyphInfo extents;
     int len = strlen(text);
-    XftTextExtentsUtf8(xconf_main.display, font, (const FcChar8 *)text, len, &extents);
+    XftTextExtentsUtf8(screen->display, font, (const FcChar8 *)text, len, &extents);
     if (w != NULL) {
         *w = extents.width;
     }
@@ -55,17 +57,19 @@ void get_text_extent(XftFont *font, const char *text, int *w, int *h) {
     }
 }
 
-int XhDrawString(const int x, const int y, const char *format, ...) {
+int draw_string(TScreen *screen,
+        const int x, const int y,
+        const char *format, ...) {
+    static char buffer[MAX_STR_LEN + 1];
     va_list aptr;
     int ret;
-    char buffer[MAX_STR_LEN + 1];
 
     va_start(aptr, format);
     ret = vsnprintf(buffer, MAX_STR_LEN, format, aptr);
     va_end(aptr);
     buffer[MAX_STR_LEN] = 0;
     if (ret > 0) {
-        XftDrawStringUtf8(xconf_main.draw, &xconf_main.color, xconf_main.fontNormal,
+        XftDrawStringUtf8(screen->draw, &screen->color, screen->fontNormal,
             x, y, (const FcChar8 *)buffer, ret);
     }
     return ret;

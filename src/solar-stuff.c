@@ -48,6 +48,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <poll.h>
 
 #include <sys/utsname.h>
 
@@ -71,8 +72,6 @@ static const char* s2 = "(C)2012-2024 Geeks3D - BernardT";
 static const int W_WIDTH  = 760;
 static const int W_HEIGHT = 220;
 
-static int select_fd;
-
 static bool onKeyPress(XEvent *e) {
     static char buf[128] = {0};
     KeySym keysym;
@@ -91,7 +90,7 @@ static void onExposeMainWindow(const int width,
     get_text_extent(xconf_main.fontNormal, "Wp|", NULL, &dy);
     dy *= 3;
     dy /= 2;
-    
+
     XftDrawRect(xconf_main.draw, &xconf_main.background, 0, 0, width, height);
     XhDrawString(x_offset, y_offset, s1);
     y_offset += dy;
@@ -146,17 +145,33 @@ static void onExposeMainWindow(const int width,
     XhDrawString(x_offset, y_offset, "%02d:%02d:%02d", sysconf->tm->tm_hour, sysconf->tm->tm_min, sysconf->tm->tm_sec);
 }
 
-static int do_select(void) {
-    static struct timeval select_time_val;
-    static fd_set select_rfds;
+static int do_select(const int select_fd) {
+    static bool inited = false;
+    static struct pollfd poll_list;
+    int retval = 0;
 
-    memset(&select_time_val, 0, sizeof (select_time_val));
-    select_time_val.tv_sec = 1;
-    select_time_val.tv_usec = 0;
-    FD_ZERO(&select_rfds);
-    FD_SET(select_fd, &select_rfds);
-    return select(select_fd + 1, &select_rfds, NULL, NULL, &select_time_val);
+    if (!inited) {
+        memset(&poll_list, 0, sizeof(struct pollfd));
+        poll_list.fd = select_fd;
+        poll_list.events = POLLIN | POLLPRI;
+        inited = true;
+    }
+    retval = poll(&poll_list, 1, 800);
+    switch(retval) {
+        case 0:
+            // fprintf(stdout, "poll-> time out\n");
+            break;
+        case -1:
+            fprintf(stdout, "poll-> FATAL ERROR\n");
+            exit(2);
+            break;
+        default:
+            // fprintf(stdout, "poll-> event occured\n");
+            break;
+    }
+    return retval;
 }
+
 
 static void send_ExposeEvent(void) {
     static XExposeEvent ee;
@@ -194,13 +209,16 @@ int main(void) {
     XEvent e;
     bool end = false;
 
-    select_fd = ConnectionNumber(xconf_main.display);
+    // https://www.x.org/releases/current/doc/libX11/libX11/libX11.html
+    // return a connection number for the specified display. 
+    // On a POSIX-conformant system, this is the file descriptor of the connection. 
+    int select_fd = XConnectionNumber(xconf_main.display);
     Atom WM_DELETE_WINDOW = XInternAtom(xconf_main.display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(xconf_main.display, xconf_main.win, &WM_DELETE_WINDOW, 1);
 
     XFlush(xconf_main.display);
     while (!end) {
-        if (do_select()) {
+        if (do_select(select_fd)) {
             while (XPending(xconf_main.display)) {
                 XNextEvent(xconf_main.display, &e);
                 switch (e.type) {

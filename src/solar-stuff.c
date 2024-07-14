@@ -49,6 +49,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <poll.h>
+#include <time.h>
 
 #include <sys/utsname.h>
 
@@ -157,7 +158,7 @@ static int do_select(const int select_fd) {
         poll_list.events = POLLIN | POLLPRI;
         inited = true;
     }
-    retval = poll(&poll_list, 1, 800);
+    retval = poll(&poll_list, 1, 300);
     switch(retval) {
         case 0:
             // fprintf(stdout, "poll-> time out\n");
@@ -209,6 +210,7 @@ int main(void) {
 
     XEvent e;
     bool end = false;
+    time_t last_time = 0;
 
     // https://www.x.org/releases/current/doc/libX11/libX11/libX11.html
     // return a connection number for the specified display. 
@@ -254,7 +256,12 @@ int main(void) {
                 }
             }
         } else {
-            send_ExposeEvent(screen);
+            struct timespec t;
+            clock_gettime(CLOCK_REALTIME, &t);
+            if (t.tv_sec != last_time) {
+                send_ExposeEvent(screen);
+                last_time = t.tv_sec;
+            }
         }
         XFlush(screen->display);
     }

@@ -56,10 +56,23 @@ static TSsysconf buffer_sysconf;
 static pthread_mutex_t mutex_sysconf = PTHREAD_MUTEX_INITIALIZER;
 
 static LONGLONG get_phys_mem(void) {
+#if defined(__FreeBSD__)
+    int mib[2];
+    long phys_mem;
+    size_t len;
+
+    mib[0] = CTL_HW;
+    mib[1] = HW_PHYSMEM;
+    len = sizeof(phys_mem);
+    sysctl(mib, 2, &phys_mem, &len, NULL, 0);
+    return (LONGLONG)phys_mem / ONE_MB;
+
+#else
     return (LONGLONG)(
             (LONGLONG)sysconf(_SC_PAGESIZE) *
             (LONGLONG)sysconf(_SC_PHYS_PAGES) /
             ONE_MB);
+#endif
 }
 
 static LONGLONG get_free_mem(void) {
@@ -137,7 +150,7 @@ static void *soli_loop(void *arg) {
 	while (!soli_bstop) {
 		fill_dynasoli_sysconf();
 		ts.tv_sec = 0;
-		ts.tv_nsec = 500000000l;
+		ts.tv_nsec = 50000000l;
 		nanosleep(&ts, NULL);
 	}
 	return NULL;

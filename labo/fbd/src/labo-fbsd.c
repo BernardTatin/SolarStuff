@@ -14,41 +14,12 @@
 #include <sys/vmmeter.h>
 #include <vm/vm_param.h>
 
-#define ONE_MB (1024 * 1024)
-
-typedef struct {
-    long phys;      // physical memory, in bytes
-    long free;      // free memory, in bytes
-    long user;      // user mem i.E. not wired
-} TMemInfos;
+#include "freebsd.h"
 
 void die(const char *format, ...);
 TMemInfos *new_meminfos(void);
 void refresh_meminfos(TMemInfos *mi);
 
-static long get_user_mem(void) {
-    int mib[2];
-    long phys_mem;
-    size_t len;
-
-    mib[0] = CTL_HW;
-    mib[1] = HW_USERMEM;
-    len = sizeof(phys_mem);
-    sysctl(mib, 2, &phys_mem, &len, NULL, 0);
-    return phys_mem / ONE_MB;
-}
-
-static long get_phys_mem(void) {
-    int mib[2];
-    long phys_mem;
-    size_t len;
-
-    mib[0] = CTL_HW;
-    mib[1] = HW_PHYSMEM;
-    len = sizeof(phys_mem);
-    sysctl(mib, 2, &phys_mem, &len, NULL, 0);
-    return phys_mem / ONE_MB;
-}
 
 static long get_free_mem(void) {
     int mib[2];
@@ -98,6 +69,31 @@ TMemInfos *new_meminfos(void) {
 void refresh_meminfos(TMemInfos *mi) {
     mi->free = get_free_mem();
     mi->user = get_user_mem();
+    get_sysctl_struct(mi, sizeof(struct vmtotal),
+            CTL_VM, VM_TOTAL);
+
+}
+
+static void print_vm(TMemInfos *mi) {
+    uint64_t *ptr = (uint64_t *)mi;
+
+    for (int i=0; i<9; i++) {
+        switch(i) {
+            case 0:
+            case 1:
+                fprintf(stdout, "%6lu mb ", *(ptr++) / ONE_MB);
+                break;
+            case 8:
+                // free memory pages
+                fprintf(stdout, "%6lu mb ", *(ptr++) * 4096 / ONE_MB);
+                break;
+            default:
+                fprintf(stdout, "%6lu kb ", *(ptr++) / ONE_KB);
+                break;
+        }
+    }
+    fprintf(stdout, "%6ld", mi->free);
+    fprintf(stdout, "\n");
 }
 
 int main(void) {
@@ -106,9 +102,10 @@ int main(void) {
             "Total", "Free", "Used", "User", "Used?");
     while(1) {
         refresh_meminfos(mi);
-        fprintf(stdout, "%6ld - %6ld - %6ld - %6ld - %6ld\n", 
-                mi->phys, mi->free, mi->phys-mi->free, 
-                mi->user, mi->phys - mi->user);
+        print_vm(mi);
+//         fprintf(stdout, "%6ld - %6ld - %6ld - %6ld - %6ld\n", 
+//                 mi->phys, mi->free, mi->phys-mi->free, 
+//                 mi->user, mi->phys - mi->user);
         sleep(1);
     }
     return 0;

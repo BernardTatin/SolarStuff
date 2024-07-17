@@ -69,10 +69,21 @@ xlibs = xlibs
 
 MAIN = solar-stuff
 EXE = bin/$(MAIN)$(arch)
-SRC = $(src)/$(MAIN).c $(xlibs)/Xhelper.c $(xlibs)/Xconf.c $(libs)/solar-infos.c $(libs)/clist.c
 
-objs = $(SRC:.c=.o)
-OBJS=$(objs:$(src)/%=$(odir)/%)
+SRC1 = $(src)/$(MAIN).c
+SRC2 = $(xlibs)/Xhelper.c $(xlibs)/Screen.c
+SRC3 = $(libs)/solar-infos.c $(libs)/clist.c
+SRC  = $(SRC1)
+SRC	+= $(SRC2)
+SRC += $(SRC3)
+
+_objs1 = $(SRC1:.c=.o)
+_objs2 = $(SRC2:.c=.o)
+_objs3 = $(SRC3:.c=.o)
+
+OBJS  = $(_objs1:$(src)/%=$(odir)/%)
+OBJS += $(_objs2:$(xlibs)/%=$(odir)/%)
+OBJS += $(_objs3:$(libs)/%=$(odir)/%)
 
 all: $(odir) bin $(EXE)
 
@@ -80,7 +91,7 @@ run: all
 	$(EXE)
 
 bin:
-	mkdir -p ./bin
+	mkdir -p $@
 
 $(odir):
 	mkdir -p $@
@@ -88,21 +99,18 @@ $(odir):
 $(EXE): $(OBJS)
 		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-$(odir)/%.o: $(src)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
 $(odir)/%.o: $(libs)/%.c
 		$(CC) -c $< -o $@ $(CFLAGS)
 
 $(odir)/%.o: $(xlibs)/%.c
 		$(CC) -c $< -o $@ $(CFLAGS)
 
-test: $(EXE)
-		./$(EXE)
+$(odir)/%.o: $(src)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 		$(RM) $(EXE) $(OBJS)
 		$(RM) a.out core
 
-.PHONY: all test clean
+.PHONY: all clean run
 

@@ -1,10 +1,14 @@
-/* 
- * File:   clist.h
+/*
+ * File:   main.c - testing my list
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
- * Created on 10 mars 2016, 21:57
+ * Created on 18 juillet 2024, 17:57
  * 
- * List à la Lisp
+ * Testing the List à la Lisp
+ * 
+ * Compilation:
+ * clang -std=c11 -I../../libs ../../libs/clist.c main.c -o test-list && ./test-list
+ * gcc -std=c11 -I../../libs ../../libs/clist.c main.c -o test-list && ./test-list
  */
 /*
     The MIT License (MIT)
@@ -32,42 +36,38 @@
  */
 
 
-#ifndef CLIST_H
-#define	CLIST_H
-
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-typedef struct _TScl_element {
-	void *value;
+#include "clist.h"
 
-	struct _TScl_element *next;
-} TScl_element;
-
-static inline TScl_element *cl_elt_new(void *value) {
-	TScl_element *elt = (TScl_element *)calloc(1, sizeof(TScl_element));
-
-	elt->value = value;
-	elt->next = NULL;
-    return elt;
+static void show_elt(TScl_element *elt) {
+    char *sz = (char *)elt->value;
+    fprintf(stdout, "<%s>\n", sz);
+}
+static void show_list(TScl_list * list, const char *name) { 
+    fprintf(stdout, "%s\n", name);
+    cl_list_for_each(list, show_elt);
 }
 
-typedef struct _TScl_list {
-	TScl_element *first;
-} TScl_list;
-
-static inline TScl_list *cl_list_new(void) {
-	TScl_list *list = (TScl_list *)calloc(1, sizeof(TScl_list));
-	return list;
+static char *strdup(const char *s) {
+    int l = strlen(s);
+    char *rs = (char *)calloc(1, l+1);
+    memmove(rs, s, l);
+    return rs;
 }
 
-static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
-    elt->next = list->first;
-    list->first = elt;
+int main(void) {
+    char buffer[32];
+    TScl_list *list = cl_list_new();
+
+    for (int i=0; i<10; i++) {
+        sprintf(buffer, "-- %3d", i);
+        TScl_element *elt = cl_elt_new(strdup(buffer));
+        cl_list_add(list, elt);
+    }
+    show_list(list, "First");
+    TScl_list *rlist = cl_reverse(list);
+    show_list(rlist, "Reverse");
+    return 0;
 }
-
-TScl_list *cl_reverse(TScl_list *list);
-void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt));
-
-#endif	/* CLIST_H */
-

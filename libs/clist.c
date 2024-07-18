@@ -35,11 +35,6 @@
 
 #include "clist.h"
 
-TScl_list *cl_list_new(void) {
-	TScl_list *list = (TScl_list *)calloc(1, sizeof(TScl_list));
-	return list;
-}
-
 void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt)) {
 	TScl_element *elt = list->first;
 
@@ -47,4 +42,17 @@ void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt)) {
 		on_element(elt);
 		elt = elt->next;
 	}
+}
+
+TScl_list *cl_reverse(TScl_list *list) {
+	TScl_element *elt = list->first;
+    TScl_list *nlist = cl_list_new();
+
+	while (elt != NULL) {
+        TScl_element *next = elt->next;
+
+		cl_list_add(nlist, elt);
+		elt = next;
+	}
+    return nlist;
 }

@@ -1,5 +1,5 @@
 /* 
- * File:   clist.h
+ * File:   sysinfo-list.c
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
  * Created on 10 mars 2016, 21:57
@@ -31,44 +31,30 @@
 
  */
 
-
-#ifndef CLIST_H
-#define	CLIST_H
-
+#include <sys/utsname.h>
 #include <stdio.h>
-#include <stdlib.h>
+// to get strdup working 
+// after stdio, if not the case, strdup !defined
+// because it seems that stdio undef them!!!
+#define __USE_XOPEN_EXTENDED
+#define __USE_XOPEN2K8
+#include <string.h>
 
-typedef struct _TScl_element {
-	void *value;
+#include "sysinfo-list.h"
+#include "compat.h"
 
-	struct _TScl_element *next;
-} TScl_element;
+#include "solar-infos.h"
 
-static inline TScl_element *cl_elt_new(void *value) {
-	TScl_element *elt = (TScl_element *)calloc(1, sizeof(TScl_element));
+TScl_list *create_sysinfo_list(void) {
+    TScl_list *list = cl_list_new();
+    TSsysconf *sc = soli_sysconf();
 
-	elt->value = value;
-	elt->next = NULL;
-    return elt;
+    TScl_element *e = tei_new("Procs act. %ld on line %ld", 
+        sc->num_procs, sc->procs_online);
+    cl_list_add(list, e);
+
+    e = tei_new("Page size: %ld bytes", sc->page_size);
+    cl_list_add(list, e);
+
+    return list;
 }
-
-typedef struct _TScl_list {
-	TScl_element *first;
-} TScl_list;
-
-static inline TScl_list *cl_list_new(void) {
-	TScl_list *list = (TScl_list *)calloc(1, sizeof(TScl_list));
-	return list;
-}
-
-static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
-    fprintf(stdout, "add <%s>\n", (char *)elt->value);
-    elt->next = list->first;
-    list->first = elt;
-}
-
-TScl_list *cl_reverse(TScl_list *list);
-void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt));
-
-#endif	/* CLIST_H */
-

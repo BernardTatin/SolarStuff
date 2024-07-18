@@ -35,11 +35,16 @@
 
  */
 
-
 #include <stdio.h>
+// to get strdup working 
+// after stdio, if not the case, strdup !defined
+// because it seems that stdio undef them!!!
+#define __USE_XOPEN_EXTENDED
+#define __USE_XOPEN2K8
 #include <string.h>
 
 #include "clist.h"
+#include "sysinfo-list.h"
 
 static void show_elt(TScl_element *elt) {
     char *sz = (char *)elt->value;
@@ -50,14 +55,17 @@ static void show_list(TScl_list * list, const char *name) {
     cl_list_for_each(list, show_elt);
 }
 
-static char *strdup(const char *s) {
-    int l = strlen(s);
-    char *rs = (char *)calloc(1, l+1);
-    memmove(rs, s, l);
-    return rs;
+static void show_elt2(TScl_element *elt) {
+    TeInfo *tei = (TeInfo *)elt->value;
+    char *sz = (char *)tei->text;
+    fprintf(stdout, "<%s>\n", sz);
+}
+static void show_list2(TScl_list * list, const char *name) { 
+    fprintf(stdout, "%s\n", name);
+    cl_list_for_each(list, show_elt2);
 }
 
-int main(void) {
+int test1(void) {
     char buffer[32];
     TScl_list *list = cl_list_new();
 
@@ -68,6 +76,14 @@ int main(void) {
     }
     show_list(list, "First");
     TScl_list *rlist = cl_reverse(list);
-    show_list(rlist, "Reverse");
+    show_list2(rlist, "Reverse");
+    return 0;
+}
+
+int main(void) {
+    TScl_list *lsi = create_sysinfo_list();
+    TScl_list *rsi = cl_reverse(lsi);
+    show_list(lsi, "Sysinfo");
+
     return 0;
 }

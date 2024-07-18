@@ -1,5 +1,5 @@
 /* 
- * File:   clist.h
+ * File:   sysinfo-list.h
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
  * Created on 10 mars 2016, 21:57
@@ -31,44 +31,40 @@
 
  */
 
+#if !defined(__sysinfo_list_h_)
+#define __sysinfo_list_h_
 
-#ifndef CLIST_H
-#define	CLIST_H
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
-typedef struct _TScl_element {
-	void *value;
+#include "clist.h"
 
-	struct _TScl_element *next;
-} TScl_element;
+typedef struct {
+    char *text;
+    int text_len;
+    bool warning;
+} TeInfo;
 
-static inline TScl_element *cl_elt_new(void *value) {
-	TScl_element *elt = (TScl_element *)calloc(1, sizeof(TScl_element));
+#define MAX_STR_LEN	511
+static inline TScl_element *tei_new(const char *format, ...) {
+    static char buffer[MAX_STR_LEN + 1];
+    va_list aptr;
+    int ret;
+    TeInfo *e = (TeInfo *)calloc(1, sizeof(TeInfo));
 
-	elt->value = value;
-	elt->next = NULL;
-    return elt;
+    va_start(aptr, format);
+    ret = vsnprintf(buffer, MAX_STR_LEN, format, aptr);
+    va_end(aptr);
+    buffer[MAX_STR_LEN] = 0;
+    e->text = strdup(buffer);
+    e->text_len = strlen(buffer);
+    e->warning = ret != e->text_len;
+    fprintf(stdout, "%s -> %s\n", buffer, e->text);
+    return cl_elt_new(e);
 }
 
-typedef struct _TScl_list {
-	TScl_element *first;
-} TScl_list;
+TScl_list *create_sysinfo_list(void);
 
-static inline TScl_list *cl_list_new(void) {
-	TScl_list *list = (TScl_list *)calloc(1, sizeof(TScl_list));
-	return list;
-}
-
-static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
-    fprintf(stdout, "add <%s>\n", (char *)elt->value);
-    elt->next = list->first;
-    list->first = elt;
-}
-
-TScl_list *cl_reverse(TScl_list *list);
-void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt));
-
-#endif	/* CLIST_H */
-
+#endif // __sysinfo_list_h_

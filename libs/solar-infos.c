@@ -103,7 +103,7 @@ static LONGLONG get_free_mem(void) {
 #endif
 }
 
-static void fill_staticsoli_sysconf(void) {
+void fill_staticsoli_sysconf(void) {
     if (!current_sysconf.inited) {
         current_sysconf.num_procs = sysconf(_SC_NPROCESSORS_CONF);
         current_sysconf.page_size = sysconf(_SC_PAGESIZE);
@@ -114,7 +114,7 @@ static void fill_staticsoli_sysconf(void) {
     }
 }
 
-static void fill_dynasoli_sysconf(void) {
+void fill_dynasoli_sysconf(void) {
     time_t tp;
 
     time(&tp);

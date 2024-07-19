@@ -83,7 +83,8 @@ int test1(void) {
 int main(void) {
     TScl_list *lsi = create_sysinfo_list();
     TScl_list *rsi = cl_reverse(lsi);
-    show_list(lsi, "Sysinfo");
+
+    show_list2(rsi, "Sysinfo");
 
     return 0;
 }

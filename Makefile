@@ -1,1 +1,1 @@
-Makefile.gnu
+Makefile.freebsd

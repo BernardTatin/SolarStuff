@@ -1,9 +1,9 @@
-/* 
+/*
  * File:   sysinfo-list.c
  * Author: Bernard TATIN <bernard dot tatin at outlook dot org>
  *
  * Created on 10 mars 2016, 21:57
- * 
+ *
  * List à la Lisp
  */
 /*
@@ -31,9 +31,11 @@
 
  */
 
+#include <time.h>
+#include <sys/time.h>
 #include <sys/utsname.h>
 #include <stdio.h>
-// to get strdup working 
+// to get strdup working
 // after stdio, if not the case, strdup !defined
 // because it seems that stdio undef them!!!
 #define __USE_XOPEN_EXTENDED
@@ -47,14 +49,35 @@
 
 TScl_list *create_sysinfo_list(void) {
     TScl_list *list = cl_list_new();
-    TSsysconf *sc = soli_sysconf();
 
-    TScl_element *e = tei_new("Procs act. %ld on line %ld", 
-        sc->num_procs, sc->procs_online);
-    cl_list_add(list, e);
+    TSsysconf *sc = fill_soli_sysconf();
 
-    e = tei_new("Page size: %ld bytes", sc->page_size);
-    cl_list_add(list, e);
+    tei_new(list,
+            "Os %s - %s Machine %s",
+            sc->sname.sysname, sc->sname.release, sc->sname.machine);
+
+    tei_new(list,
+            "%02d:%02d:%02d",
+            sc->tm->tm_hour, sc->tm->tm_min, sc->tm->tm_sec);
+
+    tei_new(list,
+            "Procs act. %ld on line %ld",
+            sc->num_procs, sc->procs_online);
+
+    tei_new(list,
+            "Page size: %ld bytes",
+            sc->page_size);
+
+    tei_new(list,
+            "Memory: tot: %6ld MB free %6ld MB",
+            sc->mem, sc->free_mem);
+
+    tei_new(list,
+            "Load %5.2f %5.2f %5.2f",
+            sc->load_av[0], sc->load_av[1], sc->load_av[2]);
+
+
+
 
     return list;
 }

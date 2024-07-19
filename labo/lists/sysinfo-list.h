@@ -48,7 +48,7 @@ typedef struct {
 } TeInfo;
 
 #define MAX_STR_LEN	511
-static inline TScl_element *tei_new(const char *format, ...) {
+static inline TScl_element *tei_new(TScl_list *list, const char *format, ...) {
     static char buffer[MAX_STR_LEN + 1];
     va_list aptr;
     int ret;
@@ -61,8 +61,10 @@ static inline TScl_element *tei_new(const char *format, ...) {
     e->text = strdup(buffer);
     e->text_len = strlen(buffer);
     e->warning = ret != e->text_len;
-    fprintf(stdout, "%s -> %s\n", buffer, e->text);
-    return cl_elt_new(e);
+    // fprintf(stdout, "%s -> %s\n", buffer, e->text);
+    TScl_element *elt = cl_elt_new(e);
+    cl_list_add(list, elt);
+    return elt;
 }
 
 TScl_list *create_sysinfo_list(void);

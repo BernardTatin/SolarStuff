@@ -41,13 +41,14 @@ ifeq ($(os), SunOS)
 else ifeq ($(os), Linux)
 	CC = clang
 	LIBS = -L/usr/lib -lX11
+	optim ?= -g2
 	optim ?= -O2
 	CFLAGS += -Wall -pedantic -std=c11
 	ipath = -I/usr/include
 else ifeq ($(os), FreeBSD)
 	CC ?= clang
 	LIBS = -L/usr/local/lib
-	optim ?= -O2
+	optim ?= -g2
 	CFLAGS += -Wall -pedantic -std=c11
 	ipath = -I/usr/local/include
 endif
@@ -62,7 +63,7 @@ libs  = ../../libs
 inc   = ../../include
 
 ipath += -I$(inc) -I./$(libs) 
-## CFLAGS += -D__USE_XOPEN_EXTENDED -D__USE_XOPEN2K8
+
 CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
 CFLAGS += $(shell pkg-config --cflags xrender freetype2)
 LDFLAGS += $(arch)

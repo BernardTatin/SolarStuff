@@ -62,7 +62,6 @@ static inline TScl_list *cl_list_new(void) {
 }
 
 static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
-    fprintf(stdout, "add <%s>\n", (char *)elt->value);
     elt->next = list->first;
     list->first = elt;
 }

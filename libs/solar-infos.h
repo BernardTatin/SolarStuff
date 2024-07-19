@@ -29,8 +29,17 @@ typedef struct {
 
 TSsysconf *soli_sysconf(void);
 
+void fill_staticsoli_sysconf(void);
+void fill_dynasoli_sysconf(void);
+
 void soli_start(void);
 void soli_stop(void);
+
+static inline TSsysconf *fill_soli_sysconf(void) {
+    fill_staticsoli_sysconf();
+    fill_dynasoli_sysconf();
+    return soli_sysconf();
+}
 
 #endif	/* SOLAR_INFOS_H */
 

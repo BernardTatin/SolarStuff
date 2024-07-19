@@ -24,6 +24,9 @@
 #define LONGLONG	long long
 #elif defined(__FreeBSD__)
 #include <stdlib.h>
+#include <stdint.h>
+#include <unistd.h>
+
 #include <sys/sysctl.h>
 #include <sys/vmmeter.h>
 #include <vm/vm_param.h>

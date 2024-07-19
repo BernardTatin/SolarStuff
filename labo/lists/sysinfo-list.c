@@ -47,6 +47,14 @@
 
 #include "solar-infos.h"
 
+void tei_free(void *vtei) {
+    TeInfo *tei = (TeInfo *)vtei;
+    if (tei != NULL) {
+        free(tei->text);
+        free(tei);
+    }
+}
+
 TScl_list *create_sysinfo_list(void) {
     TScl_list *list = cl_list_new();
 
@@ -75,9 +83,6 @@ TScl_list *create_sysinfo_list(void) {
     tei_new(list,
             "Load %5.2f %5.2f %5.2f",
             sc->load_av[0], sc->load_av[1], sc->load_av[2]);
-
-
-
 
     return list;
 }

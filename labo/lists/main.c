@@ -42,6 +42,7 @@
 #define __USE_XOPEN_EXTENDED
 #define __USE_XOPEN2K8
 #include <string.h>
+#include <unistd.h>
 
 #include "clist.h"
 #include "sysinfo-list.h"
@@ -80,11 +81,21 @@ int test1(void) {
     return 0;
 }
 
-int main(void) {
-    TScl_list *lsi = create_sysinfo_list();
-    TScl_list *rsi = cl_reverse(lsi);
+static void kill_lists(TScl_list *lsi, TScl_list *rsi) {
+    cl_list_free(lsi, tei_free);
+    cl_list_free(rsi, tei_free);
+}
 
-    show_list2(rsi, "Sysinfo");
+int main(void) {
+    while (1) {
+        TScl_list *lsi = create_sysinfo_list();
+        TScl_list *rsi = cl_reverse(lsi);
+
+        fprintf(stdout, "----------------------------------------------------------------------\n");
+        show_list2(rsi, "Sysinfo");
+        kill_lists(lsi, rsi);
+        sleep(1);
+    }
 
     return 0;
 }

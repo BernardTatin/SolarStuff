@@ -68,6 +68,7 @@ static inline void cl_list_add(TScl_list *list, TScl_element *elt) {
 
 TScl_list *cl_reverse(TScl_list *list);
 void cl_list_for_each(TScl_list *list, void (*on_element)(TScl_element *elt));
+void cl_list_free(TScl_list *list, void (*free_value)(void *value));
 
 #endif	/* CLIST_H */
 

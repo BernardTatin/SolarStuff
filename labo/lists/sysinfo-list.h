@@ -68,5 +68,7 @@ static inline TScl_element *tei_new(TScl_list *list, const char *format, ...) {
 }
 
 TScl_list *create_sysinfo_list(void);
+void tei_free(void *vtei);
+
 
 #endif // __sysinfo_list_h_

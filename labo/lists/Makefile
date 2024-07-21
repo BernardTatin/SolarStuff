@@ -29,48 +29,21 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-os := $(shell uname)
+include ../../mk/conf-gnu.mk 
 
-arch ?= -m64
-ifeq ($(os), SunOS)
-	CC ?= cc
-	LIBS = -L/usr/openwin/lib -lrt
-	optim ?= -xO3
-	CFLAGS += -errtags=yes -std=c11
-	ipath = 
-else ifeq ($(os), Linux)
-	CC = clang
-	LIBS = -L/usr/lib -lX11
-	optim ?= -g2
-	optim ?= -O2
-	CFLAGS += -Wall -pedantic -std=c11
-	ipath = -I/usr/include
-else ifeq ($(os), FreeBSD)
-	CC ?= gcc
-	LIBS = -L/usr/local/lib
-	optim ?= -g2
-	CFLAGS += -Wall -pedantic -std=c11
-	ipath = -I/usr/local/include
-endif
-
-LD = $(CC)
 LIBS += -lX11 -lpthread
-RM = rm -v -f
 
-odir  = objs$(arch)
 src   = ./
 libs  = ../../libs
 inc   = ../../include
 
 ipath += -I$(inc) -I./$(libs) 
 
-CFLAGS += $(arch) $(optim) $(ipath) -D_REENTRANT
 CFLAGS += $(shell pkg-config --cflags xrender freetype2)
-LDFLAGS += $(arch)
 LDFLAGS += -lfreetype -lXrender -lXft -lm
 
 MAIN = test-list
-EXE = bin/$(MAIN)$(arch)
+bin = ./bin
 
 SRC1 = $(src)/main.c $(src)/sysinfo-list.c
 SRC3 = $(libs)/solar-infos.c $(libs)/clist.c
@@ -83,33 +56,5 @@ _objs3 = $(SRC3:.c=.o)
 OBJS  = $(_objs1:$(src)/%=$(odir)/%)
 OBJS += $(_objs3:$(libs)/%=$(odir)/%)
 
-all: $(odir) bin $(EXE)
 
-run: all 
-	$(EXE)
-
-bin:
-	mkdir -p $@
-
-$(odir):
-	mkdir -p $@
-
-$(EXE): $(OBJS)
-		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
-
-$(odir)/%.o: $(libs)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
-$(odir)/%.o: $(xlibs)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
-$(odir)/%.o: $(src)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
-clean:
-		$(RM) $(EXE) $(OBJS)
-		$(RM) a.out core
-
-.PHONY: all clean run
-
-
+include ../../mk/targ-gnu.mk 

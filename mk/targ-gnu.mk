@@ -1,5 +1,5 @@
 ## ======================================================================
-## Makefile
+## targ-gnu.mk
 ## SolarStuff project
 ## Author: Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
@@ -29,35 +29,34 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-include mk/conf-gnu.mk 
+EXE = $(bin)/$(MAIN)$(arch)
 
-LIBS += -lX11 -lpthread
+all: $(odir) $(bin) $(EXE)
 
-ipath += -I./include -I./libs -I./xlibs
+run: all 
+	$(EXE)
 
-CFLAGS += $(shell pkg-config --cflags xrender freetype2)
-LDFLAGS += -lfreetype -lXrender -lXft -lm
+$(bin):
+	mkdir -p $@
 
-src   = src
-libs  = libs
-xlibs = xlibs
+$(odir):
+	mkdir -p $@
 
-MAIN = solar-stuff
-bin = ./bin
+$(EXE): $(OBJS)
+		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-SRC1 = $(src)/$(MAIN).c
-SRC2 = $(xlibs)/Xhelper.c $(xlibs)/Screen.c
-SRC3 = $(libs)/solar-infos.c $(libs)/clist.c
-SRC  = $(SRC1)
-SRC	+= $(SRC2)
-SRC += $(SRC3)
+$(odir)/%.o: $(libs)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
 
-_objs1 = $(SRC1:.c=.o)
-_objs2 = $(SRC2:.c=.o)
-_objs3 = $(SRC3:.c=.o)
+$(odir)/%.o: $(xlibs)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
 
-OBJS  = $(_objs1:$(src)/%=$(odir)/%)
-OBJS += $(_objs2:$(xlibs)/%=$(odir)/%)
-OBJS += $(_objs3:$(libs)/%=$(odir)/%)
+$(odir)/%.o: $(src)/%.c
+		$(CC) -c $< -o $@ $(CFLAGS)
 
-include mk/targ-gnu.mk 
+clean:
+		$(RM) $(EXE) $(OBJS)
+		$(RM) a.out core
+
+.PHONY: all clean run
+

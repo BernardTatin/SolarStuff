@@ -1,5 +1,5 @@
 ## ======================================================================
-## Makefile
+## conf-gnu.mk
 ## SolarStuff project
 ## Author: Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
@@ -29,35 +29,36 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
-include mk/conf-gnu.mk 
+os := $(shell uname)
+arch ?= -m64
+std=c11
 
-LIBS += -lX11 -lpthread
+ifeq ($(os), SunOS)
+	CC ?= cc
+	optim ?= -xO3
+	warns  = -errtags=yes
+	ipath  = 
+else ifeq ($(os), Linux)
+	CC = clang
+	LIBS = -L/usr/lib -lX11
+	optim ?= -O2
+	warns  = -Wall -pedantic
+	ipath  = -I/usr/include
+else ifeq ($(os), FreeBSD)
+	CC = gcc
+	LIBS = -L/usr/local/lib
+	optim ?= -g2
+	warns  = -Wall -pedantic
+	ipath  = -I/usr/local/include
+endif
 
-ipath += -I./include -I./libs -I./xlibs
+CFLAGS += -std=$(std)
+CFLAGS += $(optim) $(warns) $(ipath) $(arch)
+CFLAGS += -D_REENTRANT
 
-CFLAGS += $(shell pkg-config --cflags xrender freetype2)
-LDFLAGS += -lfreetype -lXrender -lXft -lm
+LDFLAGS += $(arch)
 
-src   = src
-libs  = libs
-xlibs = xlibs
+LD = $(CC)
+RM = rm -v -f
 
-MAIN = solar-stuff
-bin = ./bin
-
-SRC1 = $(src)/$(MAIN).c
-SRC2 = $(xlibs)/Xhelper.c $(xlibs)/Screen.c
-SRC3 = $(libs)/solar-infos.c $(libs)/clist.c
-SRC  = $(SRC1)
-SRC	+= $(SRC2)
-SRC += $(SRC3)
-
-_objs1 = $(SRC1:.c=.o)
-_objs2 = $(SRC2:.c=.o)
-_objs3 = $(SRC3:.c=.o)
-
-OBJS  = $(_objs1:$(src)/%=$(odir)/%)
-OBJS += $(_objs2:$(xlibs)/%=$(odir)/%)
-OBJS += $(_objs3:$(libs)/%=$(odir)/%)
-
-include mk/targ-gnu.mk 
+odir  = objs$(arch)

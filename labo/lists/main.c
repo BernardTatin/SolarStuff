@@ -51,19 +51,27 @@ static void show_elt(TScl_element *elt) {
     char *sz = (char *)elt->value;
     fprintf(stdout, "<%s>\n", sz);
 }
-static void show_list(TScl_list * list, const char *name) { 
-    fprintf(stdout, "%s\n", name);
-    cl_list_for_each(list, show_elt);
-}
 
 static void show_elt2(TScl_element *elt) {
     TeInfo *tei = (TeInfo *)elt->value;
     char *sz = (char *)tei->text;
     fprintf(stdout, "<%s>\n", sz);
 }
-static void show_list2(TScl_list * list, const char *name) { 
+
+static void show_list(TScl_list * list, 
+            const char *name,
+            void (*on_element)(TScl_element *elt)) { 
     fprintf(stdout, "%s\n", name);
-    cl_list_for_each(list, show_elt2);
+    cl_list_for_each(list, on_element);
+}
+
+
+static void kill_lists(TScl_list *lsi, 
+                    TScl_list *rsi, 
+                    void (*free_value)(void *value)) {
+    // cl_list_free(lsi, tei_free);
+    free(lsi);
+    cl_list_free(rsi, free_value);
 }
 
 int test1(void) {
@@ -75,25 +83,22 @@ int test1(void) {
         TScl_element *elt = cl_elt_new(strdup(buffer));
         cl_list_add(list, elt);
     }
-    show_list(list, "First");
+    show_list(list, "First", show_elt);
     TScl_list *rlist = cl_reverse(list);
-    show_list2(rlist, "Reverse");
+    show_list(rlist, "Reverse", show_elt);
+    kill_lists(list, rlist, free);
     return 0;
 }
 
-static void kill_lists(TScl_list *lsi, TScl_list *rsi) {
-    cl_list_free(lsi, tei_free);
-    cl_list_free(rsi, tei_free);
-}
-
 int main(void) {
+    test1();
     while (1) {
         TScl_list *lsi = create_sysinfo_list();
         TScl_list *rsi = cl_reverse(lsi);
 
         fprintf(stdout, "----------------------------------------------------------------------\n");
-        show_list2(rsi, "Sysinfo");
-        kill_lists(lsi, rsi);
+        show_list(rsi, "Sysinfo", show_elt2);
+        kill_lists(lsi, rsi, tei_free);
         sleep(1);
     }
 

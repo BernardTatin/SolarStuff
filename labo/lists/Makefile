@@ -46,7 +46,7 @@ else ifeq ($(os), Linux)
 	CFLAGS += -Wall -pedantic -std=c11
 	ipath = -I/usr/include
 else ifeq ($(os), FreeBSD)
-	CC ?= clang
+	CC ?= gcc
 	LIBS = -L/usr/local/lib
 	optim ?= -g2
 	CFLAGS += -Wall -pedantic -std=c11

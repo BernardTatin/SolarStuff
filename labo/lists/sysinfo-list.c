@@ -38,8 +38,9 @@
 // to get strdup working
 // after stdio, if not the case, strdup !defined
 // because it seems that stdio undef them!!!
-#define __USE_XOPEN_EXTENDED
-#define __USE_XOPEN2K8
+// we don't need them with -std=c23
+// #define __USE_XOPEN_EXTENDED
+// #define __USE_XOPEN2K8
 #include <string.h>
 
 #include "sysinfo-list.h"

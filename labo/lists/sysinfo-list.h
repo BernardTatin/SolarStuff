@@ -37,7 +37,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#if (__STDC_VERSION__ < 202300L)
 #include <stdbool.h>
+#endif
 
 #include "clist.h"
 

@@ -31,7 +31,7 @@
 
 os := $(shell uname)
 arch ?= -m64
-std=c11
+std=c23
 
 ifeq ($(os), SunOS)
 	CC ?= cc
@@ -45,7 +45,7 @@ else ifeq ($(os), Linux)
 	warns  = -Wall -pedantic
 	ipath  = -I/usr/include
 else ifeq ($(os), FreeBSD)
-	CC = gcc
+	CC = clang
 	LIBS = -L/usr/local/lib
 	optim ?= -g2
 	warns  = -Wall -pedantic

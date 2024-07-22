@@ -31,7 +31,13 @@
 
 EXE = $(bin)/$(MAIN)$(arch)
 
+OBJS  = $(SRC:.c=.o)
+
 all: $(odir) $(bin) $(EXE)
+
+debug:
+	@echo "SRC = $(SRC)"
+	@echo "OBJS = $(OBJS)"
 
 run: all 
 	$(EXE)
@@ -43,20 +49,25 @@ $(odir):
 	mkdir -p $@
 
 $(EXE): $(OBJS)
-		$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(LD) -o $(EXE) $(OBJS) $(LDFLAGS) $(LIBS)
 
-$(odir)/%.o: $(libs)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
-$(odir)/%.o: $(xlibs)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
-
-$(odir)/%.o: $(src)/%.c
-		$(CC) -c $< -o $@ $(CFLAGS)
+%.o: %.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
-		$(RM) $(EXE) $(OBJS)
-		$(RM) a.out core
+	$(RM) $(EXE) $(OBJS)
+	$(RM) a.out core
 
-.PHONY: all clean run
+fullclean: clean 
+	$(RM) valgrind*
+
+valgrind: all
+	valgrind --leak-check=full \
+			--show-leak-kinds=all \
+			--track-origins=yes \
+			--verbose \
+			--log-file=valgrind-out.txt \
+			$(EXE)
+
+.PHONY: all clean fullclean run valgrind debug
 

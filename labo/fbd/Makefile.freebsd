@@ -82,5 +82,14 @@ install: ${BINDIR} ${PROG}
 run: ${PROG}
 	./${PROG}
 
+valgrind: ${PROG}
+	valgrind --leak-check=full \
+			--show-leak-kinds=all \
+			--track-origins=yes \
+			--verbose \
+			--log-file=valgrind-out.txt \
+			./${PROG}
+
+
 .include <bsd.prog.mk>
 

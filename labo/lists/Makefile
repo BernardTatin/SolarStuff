@@ -33,7 +33,7 @@ include ../../mk/conf-gnu.mk
 
 LIBS += -lX11 -lpthread
 
-src   = ./
+src   = .
 libs  = ../../libs
 inc   = ../../include
 
@@ -47,14 +47,7 @@ bin = ./bin
 
 SRC1 = $(src)/main.c $(src)/sysinfo-list.c
 SRC3 = $(libs)/solar-infos.c $(libs)/clist.c
-SRC  = $(SRC1)
-SRC += $(SRC3)
-
-_objs1 = $(SRC1:.c=.o)
-_objs3 = $(SRC3:.c=.o)
-
-OBJS  = $(_objs1:$(src)/%=$(odir)/%)
-OBJS += $(_objs3:$(libs)/%=$(odir)/%)
+SRC  = $(SRC1) $(SRC3)
 
 
 include ../../mk/targ-gnu.mk 

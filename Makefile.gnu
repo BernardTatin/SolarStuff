@@ -52,12 +52,4 @@ SRC  = $(SRC1)
 SRC	+= $(SRC2)
 SRC += $(SRC3)
 
-_objs1 = $(SRC1:.c=.o)
-_objs2 = $(SRC2:.c=.o)
-_objs3 = $(SRC3:.c=.o)
-
-OBJS  = $(_objs1:$(src)/%=$(odir)/%)
-OBJS += $(_objs2:$(xlibs)/%=$(odir)/%)
-OBJS += $(_objs3:$(libs)/%=$(odir)/%)
-
 include mk/targ-gnu.mk 

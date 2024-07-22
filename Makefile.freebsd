@@ -60,12 +60,8 @@ CFLAGS += ${optim}
 LDADD  += -L/usr/local/lib -lX11 -lpthread -lrt
 LDADD  += -lfreetype -lXrender -lXft -lm
 
-
-
 OBJDIR = ${HERE}/objs
 BINDIR = ${HERE}/bin
-
-
 
 BINGRP=	bernard
 BINOWN= bernard
@@ -81,6 +77,15 @@ install: ${BINDIR} ${PROG}
 
 run: ${PROG}
 	./${PROG}
+
+valgrind: ${PROG}
+	valgrind --leak-check=full \
+			--show-leak-kinds=all \
+			--track-origins=yes \
+			--verbose \
+			--log-file=valgrind-out.txt \
+			./${PROG}
+
 
 .include <bsd.prog.mk>
 

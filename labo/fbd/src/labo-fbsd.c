@@ -100,7 +100,7 @@ int main(void) {
     TMemInfos *mi = new_meminfos();
     fprintf(stdout, "%6s - %6s - %6s - %6s - %6s\n",
             "Total", "Free", "Used", "User", "Used?");
-    while(1) {
+   for (int i=0; i<5; i++) {
         refresh_meminfos(mi);
         print_vm(mi);
 //         fprintf(stdout, "%6ld - %6ld - %6ld - %6ld - %6ld\n", 
@@ -108,5 +108,6 @@ int main(void) {
 //                 mi->user, mi->phys - mi->user);
         sleep(1);
     }
+    free(mi);
     return 0;
 }

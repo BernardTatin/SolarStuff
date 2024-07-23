@@ -36,7 +36,7 @@ CC = clang
 
 RM = rm -fv
 
-optim =
+optim = -gfull
 
 HERE=.
 ROOT = ../..
@@ -51,7 +51,7 @@ PROG = ${MAIN}
 SRCS = ${SRCDIR}/${MAIN}.c  ${libs}/clist.c
 
 WARNS  ?= 6			# level of warnings/errors 
-CSTD    = c11
+CSTD    = c23
 CFLAGS += -D_REENTRANT
 CFLAGS += ${INCDIR} -I/usr/local/include -I/usr/local/include/freetype2
 CFLAGS += $(shell pkg-config --cflags xrender freetype2)
@@ -60,15 +60,15 @@ CFLAGS += ${optim}
 LDADD  += -L/usr/local/lib -lX11 -lpthread -lrt
 LDADD  += -lfreetype -lXrender -lXft -lm
 
-
-
 OBJDIR = ${HERE}/objs
 BINDIR = ${HERE}/bin
 
-
-
 BINGRP=	bernard
 BINOWN= bernard
+
+# != -> replace the content of the variable 
+#       with the output of the shell command
+NOW != date "+%Y%m%d-%H%M%S"
 
 ${BINDIR}:
 	mkdir -p ${BINDIR}
@@ -86,10 +86,12 @@ valgrind: ${PROG}
 	valgrind --leak-check=full \
 			--show-leak-kinds=all \
 			--track-origins=yes \
-			--verbose \
-			--log-file=valgrind-out.txt \
+			--log-file=valgrind-${NOW}.txt \
 			./${PROG}
+			# --verbose \
 
+fullclean: clean
+	rm -f valgrind*
 
 .include <bsd.prog.mk>
 

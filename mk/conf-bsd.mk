@@ -1,9 +1,9 @@
 ## ======================================================================
-## Makefile.freebsd
+## conf-bsd.mk
 ## SolarStuff project
 ## Author: Bernard TATIN <bernard dot tatin at outlook dot org>
 ##
-## Created on 3 mars 2016, 22:20
+## Created on 23 juillet 2024, 21:15
 ##
 ## ======================================================================
 
@@ -29,50 +29,25 @@
 ##    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ##    SOFTWARE.
 
+MK_DEBUG_FILES = no
+MK_MAN=no
 
+CC = clang
 
-ROOT = ../..
-SRCDIR = ${HERE}/src
-libs  = ${ROOT}/libs
+RM = rm -fv
 
-INCDIR = -I${SRCDIR} -I${libs}
+optim = -gfull
 
-MAIN = labo-fbsd
-PROG = ${MAIN}
+WARNS  ?= 6			# level of warnings/errors 
+CSTD    = c23
 
-SRCS = ${SRCDIR}/${MAIN}.c  ${libs}/clist.c
+HERE=.
 
-CFLAGS += -D_REENTRANT
-CFLAGS += ${INCDIR} -I/usr/local/include -I/usr/local/include/freetype2
-CFLAGS += $(shell pkg-config --cflags xrender freetype2)
-CFLAGS += ${optim}
+BINGRP=	bernard
+BINOWN= bernard
 
-LDADD  += -L/usr/local/lib -lX11 -lpthread -lrt
-LDADD  += -lfreetype -lXrender -lXft -lm
+# != -> replace the content of the variable 
+#       with the output of the shell command
+NOW != date "+%Y%m%d-%H%M%S"
 
-
-${BINDIR}:
-	mkdir -p ${BINDIR}
-
-help:
-	@echo "CFLAGS ${CFLAGS}"
-
-install: ${BINDIR} ${PROG}
-	cp ${PROG} ${BINDIR}/${PROG}
-
-run: ${PROG}
-	./${PROG}
-
-valgrind: ${PROG}
-	valgrind --leak-check=full \
-			--show-leak-kinds=all \
-			--track-origins=yes \
-			--log-file=valgrind-${NOW}.txt \
-			./${PROG}
-			# --verbose \
-
-fullclean: clean
-	rm -f valgrind*
-
-.include <bsd.prog.mk>
-
+BINDIR = ${HERE}/bin

@@ -36,11 +36,6 @@
  */
 
 #include <stdio.h>
-// to get strdup working 
-// after stdio, if not the case, strdup !defined
-// because it seems that stdio undef them!!!
-// #define __USE_XOPEN_EXTENDED
-// #define __USE_XOPEN2K8
 #include <string.h>
 #include <unistd.h>
 

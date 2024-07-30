@@ -31,7 +31,7 @@
 
 os := $(shell uname)
 arch ?= -m64
-std=c23
+std=c99
 
 ifeq ($(os), SunOS)
 	CC ?= cc

@@ -115,10 +115,23 @@ void fill_staticsoli_sysconf(void) {
 }
 
 void fill_dynasoli_sysconf(void) {
-    time_t tp;
+    static time_t tp;
+    static struct tm ltm;
 
     time(&tp);
-    current_sysconf.tm = localtime(&tp);
+    // Valgrind complains about lost bytes here, with localtime as well with localtime_r
+    // these functions seems to allocate some memory.
+    // (line numbers have changed...)
+    // 23,440 bytes in 1 blocks are still reachable in loss record 4 of 4
+    //    at 0x484D314: malloc (vg_replace_malloc.c:450)
+    //    by 0x4C29CB0: ??? (in /lib/libc.so.7)
+    //    by 0x4C29F75: ??? (in /lib/libc.so.7)
+    //    by 0x202A8F: fill_dynasoli_sysconf (solar-infos.c:122)
+    //    by 0x2027AD: fill_soli_sysconf (solar-infos.h:40)
+    //    by 0x202655: create_sysinfo_list (sysinfo-list.c:56)
+    //    by 0x202524: main (main.c:91)
+    localtime_r(&tp, &ltm);
+    current_sysconf.tm = &ltm;
     current_sysconf.procs_online = sysconf(_SC_NPROCESSORS_ONLN);
 
     current_sysconf.free_mem = get_free_mem();

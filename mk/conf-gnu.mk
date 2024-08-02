@@ -47,7 +47,7 @@ else ifeq ($(os), Linux)
 else ifeq ($(os), FreeBSD)
 	CC = clang
 	LIBS = -L/usr/local/lib
-	optim ?= -g2
+	optim ?= -g3
 	warns  = -Wall -pedantic
 	ipath  = -I/usr/local/include
 endif

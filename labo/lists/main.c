@@ -64,8 +64,7 @@ static void show_list(TScl_list * list,
 static void kill_lists(TScl_list *lsi, 
                     TScl_list *rsi, 
                     void (*free_value)(void *value)) {
-    // cl_list_free(lsi, tei_free);
-    free(lsi);
+    cl_list_free(lsi, NULL);
     cl_list_free(rsi, free_value);
 }
 
@@ -86,7 +85,7 @@ int test1(void) {
 }
 
 int main(void) {
-    test1();
+    // test1();
 
     for (int i=0; i<5; i++) {
         TScl_list *lsi = create_sysinfo_list();

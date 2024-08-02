@@ -50,8 +50,9 @@ TScl_list *cl_reverse(TScl_list *list) {
 
 	while (elt != NULL) {
         TScl_element *next = elt->next;
+        TScl_element *new = cl_elt_new(elt->value);
 
-		cl_list_add(nlist, elt);
+		cl_list_add(nlist, new);
 		elt = next;
 	}
     return nlist;

@@ -5,6 +5,18 @@
  * Created on 10 mars 2016, 21:57
  * 
  * List à la Lisp
+ * 
+ * It's not easy to create Lisp like lists without a garbage collector.
+ * 
+ * We must have a *cons* with a car and a cdr. I didn't do like that,
+ * I don't use a garbage collector. As a result, functions like cl_reverse
+ * and cl_list_free are dangerous. cl_reverse returns a new list with values 
+ * are shared with the original list. When freeing both lists, we must
+ * be aware that we can free the values 2 times, which has some negative effects 
+ * on the program. At least, Valgrind will complain about 138 allocs against
+ * 194 frees. To resolve this problem, each values must have a at least 
+ * a reference counter.
+ *
  */
 /*
     The MIT License (MIT)

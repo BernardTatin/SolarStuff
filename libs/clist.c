@@ -67,6 +67,7 @@ void cl_list_free(TScl_list *list, void (*free_value)(void *value)) {
 
     while (elt != NULL) {
         TScl_element *next = elt->next;
+
         if (free_value != NULL) {
             free_value(elt->value);
         }
